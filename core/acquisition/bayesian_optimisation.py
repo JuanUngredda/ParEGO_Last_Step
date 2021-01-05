@@ -296,7 +296,7 @@ class BO(object):
     def verbosity_plot_2D_unconstrained(self):
         ####plots
         print("generating plots")
-        design_plot = initial_design('random', self.space, 1000)
+        design_plot = initial_design('random', self.space, 10000)
 
         # precision = []
         # for i in range(20):

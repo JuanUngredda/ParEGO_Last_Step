@@ -302,7 +302,7 @@ class HOLE(function2d):
         self.q = 0.2
         self.p = 2.0
         self.d0 = 0.02
-        self.h = 2
+        self.h = 2.0
         self.delta = 1- (np.sqrt(2.0)/2.0)
         self.alpha = np.pi/4.0
         if sd == None:
@@ -333,7 +333,6 @@ class HOLE(function2d):
             u = np.sin(x1ppp / 2.0)
             v = (np.sin(x2ppp / 2.0)) ** 2.0
 
-
             if u < 0:
                 up = -(-u) ** (self.h)
             else:
@@ -345,7 +344,7 @@ class HOLE(function2d):
             t = up
             a = vp * 2.0 * self.p
 
-            if a < self.p:
+            if a <= self.p:
                 b = (self.p - a) * np.exp(self.q)
             else:
                 b = 0
@@ -354,8 +353,8 @@ class HOLE(function2d):
             c = self.q / (d ** 2.0)
 
 
-            fval = (t + 1)**2.0 + a + b* np.exp( -c * ( t - d) ** 2.0)
-            print("fval", fval)
+            fval = ((t + 1)**2.0) + a + b* np.exp( -c * ( t - d) ** 2.0)
+            # print("fval", fval)
             return -fval.reshape(n, 1)
 
     def f2(self, X, true_val=False):
@@ -387,16 +386,17 @@ class HOLE(function2d):
             t = up
             a = vp * 2.0 * self.p
 
-            if a < self.p:
+            # print("a",a, "self.p", self.p)
+            if a <= self.p:
                 b = (self.p - a) * np.exp(self.q)
             else:
                 b = 0
-
+            # print("b", b)
             d = (self.q / (2.0 * a)) + self.d0
             c = self.q / (d ** 2.0)
 
-            fval = (t - 1) **2.0 + a + b * np.exp(-c * (t + d) ** 2.0)
-            print("fval", fval)
+            fval = ((t - 1) **2.0) + a + b * np.exp(-c * (t + d) ** 2.0)
+            # print("fval", fval)
             return -fval.reshape(n, 1)
 
 class DEB(function2d):

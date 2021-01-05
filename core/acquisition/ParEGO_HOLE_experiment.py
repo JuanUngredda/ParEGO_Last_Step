@@ -24,14 +24,14 @@ from time import time as time
 # --- Function to optimize
 
 
-def NO_HOLE_function_caller_test(rep):
+def HOLE_function_caller_test(rep):
 
     penalty =0
     noise = 1e-6
     alpha =1.95
     np.random.seed(rep)
     folder = "RESULTS"
-    subfolder = "NO_HOLE_ParEGO_utility_LS"
+    subfolder = "HOLE_ParEGO_utility_LS"
     cwd = os.getcwd()
     path = cwd + "/" + folder + "/"+subfolder
 
@@ -145,7 +145,7 @@ def NO_HOLE_function_caller_test(rep):
 
 # for rep in range(10):
 #  function_caller_test_function_2_penalty(rep)
-# POL_function_caller_test(rep=16)
+# HOLE_function_caller_test(rep=16)
 print("ready")
 
 
