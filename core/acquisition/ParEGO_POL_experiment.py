@@ -29,7 +29,7 @@ def POL_function_caller_test(rep):
     penalty =0
     noise = 1e-6
     alpha =1.95
-    np.random.seed(rep)
+    np.random.seed(rep+50)
     folder = "RESULTS"
     subfolder = "POL_ParEGO_utility_LS"
     cwd = os.getcwd()
