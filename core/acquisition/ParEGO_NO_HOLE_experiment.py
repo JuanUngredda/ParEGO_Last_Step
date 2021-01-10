@@ -31,7 +31,7 @@ def NO_HOLE_function_caller_test(rep):
     alpha =1.95
     np.random.seed(rep)
     folder = "RESULTS"
-    subfolder = "NO_HOLE_ParEGO_utility_LS"
+    subfolder = "NO_HOLE_ParEGO_utility_LS2"
     cwd = os.getcwd()
     path = cwd + "/" + folder + "/"+subfolder
 

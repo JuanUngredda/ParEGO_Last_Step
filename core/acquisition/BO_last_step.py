@@ -29,6 +29,8 @@ class Last_Step():
         for w in range(self.weight.shape[1]):
             self.data["w" + str(w)] = np.array([])
 
+
+        self.n_last_steps = 2
         self.path = path
 
         self.method = "parEGO"
@@ -501,115 +503,118 @@ class Last_Step():
 
         #training GP
         X_train = self.model.get_X_values()
-        Y_train, cost_new = self.objective.evaluate(X_train)
-        # print("Y_train",Y_train)
-        Y_train = -np.concatenate(Y_train, axis=1)
-        U_train = self.chevicheff_scalarisation(Y_train)
-        U_train = np.log([U_train.reshape((len(U_train),1))])
+        for it in range(self.n_last_steps):
+            Y_train, cost_new = self.objective.evaluate(X_train)
+            # print("Y_train",Y_train)
+            Y_train = -np.concatenate(Y_train, axis=1)
+            U_train = self.chevicheff_scalarisation(Y_train)
+            U_train = np.log([U_train.reshape((len(U_train),1))])
 
 
-        self.model_U = multi_outputGP(output_dim=1, noise_var=[1e-6] , exact_feval=[True] )
-        print("model_U,", self.model_U.kernel)
-        self._update_model(X_train, U_train, model=self.model_U)
+            self.model_U = multi_outputGP(output_dim=1, noise_var=[1e-6] , exact_feval=[True] )
+            print("model_U,", self.model_U.kernel)
+            self._update_model(X_train, U_train, model=self.model_U)
 
-        #finding best sampled point
-        feasable_samples, feasable_Y = self.filter_Y_samples()
-        if np.sum(feasable_samples)>0:
-            # print("feasable_Y",feasable_Y)
-            utility_sampled_designs = self.chevicheff_scalarisation(feasable_Y)
-            # print("U_train",U_train)
-            # print("utility_sampled_designs",utility_sampled_designs)
+            #finding best sampled point
+            feasable_samples, feasable_Y = self.filter_Y_samples()
+            if np.sum(feasable_samples)>0:
+                # print("feasable_Y",feasable_Y)
+                utility_sampled_designs = self.chevicheff_scalarisation(feasable_Y)
+                # print("U_train",U_train)
+                # print("utility_sampled_designs",utility_sampled_designs)
 
-            feasable_sampled_X = self.model.get_X_values()[feasable_samples]
-            best_sampled_X = feasable_sampled_X[np.argmin(utility_sampled_designs)]
-            self.best_sampled_X = best_sampled_X
-            self.base_utility = np.min(utility_sampled_designs)
-            print("self.base_utility",self.base_utility)
-            # print("U_train",U_train)
-        else:
-            best_sampled_X = np.array([0, 0])
-            self.best_sampled_X = best_sampled_X
-            self.base_utility = 0.0
-
-        recommended_x, _ = self.acq_opt.optimize_inner_func(f=self.expected_improvement_constrained, True_GP=self.model_U,include_point=True)
-        # print("self.base_utility",self.base_utility ,"improvement base", _)
-        plot = False
-        if plot == True:
-            space = self.space
-            X_plot = GPyOpt.experiment_design.initial_design('latin', space, 5000)
-            fig, axs = plt.subplots(3, 2)
-            muX_inner, cost = self.objective.evaluate(X_plot)
-            # print("muX_inner ", muX_inner)
-            muX_inner = np.concatenate(muX_inner,axis=-1)
-
-            if self.constraint is not None:
-                Fz = self.probability_feasibility_multi_gp(X_plot)
-                feasable_mu_index = np.array(Fz > 0.51, dtype=bool).reshape(-1)
-                Feas_muX = -muX_inner[feasable_mu_index]
+                feasable_sampled_X = self.model.get_X_values()[feasable_samples]
+                best_sampled_X = feasable_sampled_X[np.argmin(utility_sampled_designs)]
+                self.best_sampled_X = best_sampled_X
+                self.base_utility = np.min(utility_sampled_designs)
+                print("self.base_utility",self.base_utility)
+                # print("U_train",U_train)
             else:
-                Feas_muX = -muX_inner
-                feasable_mu_index = np.repeat(True, Feas_muX.shape[0])
+                best_sampled_X = np.array([0, 0])
+                self.best_sampled_X = best_sampled_X
+                self.base_utility = 0.0
 
-            uval = self.model_U.posterior_mean(X_plot)
-            uval_var = self.model_U.posterior_variance(X_plot, noise=False)
-            print("self.best_sampled_X", self.best_sampled_X)
-            mu_x_sampled, cost = self.objective.evaluate(np.atleast_2d(self.best_sampled_X))
-            print(" mu_x_sampled,", mu_x_sampled)
-            mu_x_sampled = np.concatenate(mu_x_sampled,axis=-1)
+            recommended_x, _ = self.acq_opt.optimize_inner_func(f=self.expected_improvement_constrained, True_GP=self.model_U,include_point=True)
+            # print("self.base_utility",self.base_utility ,"improvement base", _)
+            plot = False
+            if plot == True:
+                space = self.space
+                X_plot = GPyOpt.experiment_design.initial_design('latin', space, 5000)
+                fig, axs = plt.subplots(3, 2)
+                muX_inner, cost = self.objective.evaluate(X_plot)
+                # print("muX_inner ", muX_inner)
+                muX_inner = np.concatenate(muX_inner,axis=-1)
 
-            axs[0, 0].set_title("utility_plot GP")
-            axs[0, 0].scatter(Feas_muX[:, 0], Feas_muX[:, 1], c=np.array(uval).reshape(-1))
-            axs[0, 0].scatter(feasable_Y[:,0], feasable_Y[:,1], color="magenta")
-            axs[0, 0].scatter(-mu_x_sampled[:, 0], -mu_x_sampled[:, 1], color="red", marker="x")
+                if self.constraint is not None:
+                    Fz = self.probability_feasibility_multi_gp(X_plot)
+                    feasable_mu_index = np.array(Fz > 0.51, dtype=bool).reshape(-1)
+                    Feas_muX = -muX_inner[feasable_mu_index]
+                else:
+                    Feas_muX = -muX_inner
+                    feasable_mu_index = np.repeat(True, Feas_muX.shape[0])
 
-            print("recommended_x",recommended_x, "self.objective.evaluate(recommended_x)",self.objective.evaluate(recommended_x))
-            print("log evaluation recommended x", self.expected_improvement_constrained(recommended_x, verbose=True))
-            mu_recommended,dummy_C = self.objective.evaluate(recommended_x)
-            mu_recommended = -np.concatenate(mu_recommended,axis=-1)
-            print("mu_recommended",mu_recommended)
+                uval = self.model_U.posterior_mean(X_plot)
+                uval_var = self.model_U.posterior_variance(X_plot, noise=False)
+                print("self.best_sampled_X", self.best_sampled_X)
+                mu_x_sampled, cost = self.objective.evaluate(np.atleast_2d(self.best_sampled_X))
+                print(" mu_x_sampled,", mu_x_sampled)
+                mu_x_sampled = np.concatenate(mu_x_sampled,axis=-1)
 
-            acq = self.expected_improvement_constrained(X_plot)
-            axs[1, 0].set_title("utility_plot")
-            axs[1, 0].scatter(Feas_muX[:, 0], Feas_muX[:, 1], c=np.array(acq).reshape(-1))
-            axs[1, 0].scatter(feasable_Y[:,0], feasable_Y[:,1], color="magenta")
-            axs[1, 0].scatter(mu_recommended[:, 0], mu_recommended[:, 1], color="red")
+                axs[0, 0].set_title("utility_plot GP")
+                axs[0, 0].scatter(Feas_muX[:, 0], Feas_muX[:, 1], c=np.array(uval).reshape(-1))
+                axs[0, 0].scatter(feasable_Y[:,0], feasable_Y[:,1], color="magenta")
+                axs[0, 0].scatter(-mu_x_sampled[:, 0], -mu_x_sampled[:, 1], color="red", marker="x")
+
+                print("recommended_x",recommended_x, "self.objective.evaluate(recommended_x)",self.objective.evaluate(recommended_x))
+                print("log evaluation recommended x", self.expected_improvement_constrained(recommended_x, verbose=True))
+                mu_recommended,dummy_C = self.objective.evaluate(recommended_x)
+                mu_recommended = -np.concatenate(mu_recommended,axis=-1)
+                print("mu_recommended",mu_recommended)
+
+                acq = self.expected_improvement_constrained(X_plot)
+                axs[1, 0].set_title("utility_plot")
+                axs[1, 0].scatter(Feas_muX[:, 0], Feas_muX[:, 1], c=np.array(acq).reshape(-1))
+                axs[1, 0].scatter(feasable_Y[:,0], feasable_Y[:,1], color="magenta")
+                axs[1, 0].scatter(mu_recommended[:, 0], mu_recommended[:, 1], color="red")
 
 
-            utility_underlying_func = self.chevicheff_scalarisation(-muX_inner)
+                utility_underlying_func = self.chevicheff_scalarisation(-muX_inner)
 
-            axs[0, 1].set_title("utility_plot true")
-            axs[0, 1].scatter(Feas_muX[:, 0], Feas_muX[:, 1], c=np.array(utility_underlying_func).reshape(-1))
-            axs[0, 1].scatter(feasable_Y[:, 0], feasable_Y[:, 1], color="magenta")
-            axs[0, 1].scatter(-mu_x_sampled[:, 0], -mu_x_sampled[:, 1], color="red", marker="x")
+                axs[0, 1].set_title("utility_plot true")
+                axs[0, 1].scatter(Feas_muX[:, 0], Feas_muX[:, 1], c=np.array(utility_underlying_func).reshape(-1))
+                axs[0, 1].scatter(feasable_Y[:, 0], feasable_Y[:, 1], color="magenta")
+                axs[0, 1].scatter(-mu_x_sampled[:, 0], -mu_x_sampled[:, 1], color="red", marker="x")
 
 
-            axs[1, 1].set_title("utility_plot X space true")
-            axs[1, 1].scatter(X_plot[:, 0], X_plot[:, 1], c=np.array(uval_var).reshape(-1))
-            axs[1, 1].scatter(X_train[:,0], X_train[:,1], c="magenta")
+                axs[1, 1].set_title("utility_plot X space true")
+                axs[1, 1].scatter(X_plot[:, 0], X_plot[:, 1], c=np.array(uval_var).reshape(-1))
+                axs[1, 1].scatter(X_train[:,0], X_train[:,1], c="magenta")
 
-            axs[2, 1].set_title("utility_plot X space GP")
-            axs[2, 1].scatter(X_plot[:, 0], X_plot[:, 1], c=np.array(uval).reshape(-1))
-            axs[2, 1].scatter(recommended_x[:, 0], recommended_x[:, 1], color="red")
+                axs[2, 1].set_title("utility_plot X space GP")
+                axs[2, 1].scatter(X_plot[:, 0], X_plot[:, 1], c=np.array(uval).reshape(-1))
+                axs[2, 1].scatter(recommended_x[:, 0], recommended_x[:, 1], color="red")
 
-            print("disc acq", np.min(acq), "true minimum",_ )
-            axs[2, 0].set_title("utility_plot X space acq")
-            axs[2, 0].scatter(X_plot[:, 0], X_plot[:, 1], c=np.array(acq).reshape(-1))
-            axs[2,0].scatter(recommended_x[:,0], recommended_x[:,1], color="red")
-            axs[2, 0].scatter(X_train[:, 0], X_train[:, 1], c="magenta")
-            axs[2, 0].scatter(self.best_sampled_X[0], self.best_sampled_X[1], color="red", marker="x")
+                print("disc acq", np.min(acq), "true minimum",_ )
+                axs[2, 0].set_title("utility_plot X space acq")
+                axs[2, 0].scatter(X_plot[:, 0], X_plot[:, 1], c=np.array(acq).reshape(-1))
+                axs[2,0].scatter(recommended_x[:,0], recommended_x[:,1], color="red")
+                axs[2, 0].scatter(X_train[:, 0], X_train[:, 1], c="magenta")
+                axs[2, 0].scatter(self.best_sampled_X[0], self.best_sampled_X[1], color="red", marker="x")
 
-            # axs[0,0].plot(Feas_muX[:,0],  Feas_muX[:,0] * (self.weight[:,0]/self.weight[:,1]))
-            # axs[0,0].set_xlim([-150, 0])
-            # axs[0, 0].set_ylim([-70, -30])
-            # mu_recommended = -self.model.posterior_mean(recommended_x)
-            # print("mu_recommended",mu_recommended, "predicted_f",predicted_f)
+                # axs[0,0].plot(Feas_muX[:,0],  Feas_muX[:,0] * (self.weight[:,0]/self.weight[:,1]))
+                # axs[0,0].set_xlim([-150, 0])
+                # axs[0, 0].set_ylim([-70, -30])
+                # mu_recommended = -self.model.posterior_mean(recommended_x)
+                # print("mu_recommended",mu_recommended, "predicted_f",predicted_f)
 
-            # axs[0, 1].set_title("Pdom_plot")
-            # axs[0, 1].scatter(Feas_muX[:, 0], Feas_muX[:, 1], c=np.array(Pdom).reshape(-1))
+                # axs[0, 1].set_title("Pdom_plot")
+                # axs[0, 1].scatter(Feas_muX[:, 0], Feas_muX[:, 1], c=np.array(Pdom).reshape(-1))
 
-            plt.show()
+                plt.show()
 
-        self.store_results(recommended_x)
+            X_train = np.concatenate((X_train,recommended_x))
+
+        self.store_results(np.atleast_2d(recommended_x))
 
         return recommended_x, 0
 
