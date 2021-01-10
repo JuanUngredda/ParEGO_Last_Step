@@ -7,7 +7,7 @@ import os
 from multi_objective import MultiObjective
 from multi_outputGP import multi_outputGP
 from scipy.optimize import minimize
-
+from pygmo import *
 class Last_Step():
     def __init__(self, model_f, model_c, true_f, true_c, n_f, n_c, acquisition_optimiser,acquisition_f,space, seed=None, prior_gen = None,path=None):
         self.model = model_f
@@ -462,6 +462,44 @@ class Last_Step():
         self.store_results(recommended_x)
         return recommended_x, 0
 
+    # def Generate_Pareto_Front(self):
+    #     X_train = self.model.get_X_values()
+    #
+    #     Y_train, cost_new = self.objective.evaluate(X_train)
+    #     model = multi_outputGP(output_dim=2, noise_var=[1e-6,1e-6] , exact_feval=[True,True] )
+    #     self._update_model(X_train, Y_train, model=model)
+    #     GP_y_predictions  = self.mean_prediction_model(X_train,model)
+    #
+    #
+    #     bounds = self.space.get_continuous_bounds()
+    #     bounds = self.bounds_format_adapter(bounds)
+    #     udp = GA(f=GP_y_predictions, bounds=bounds)
+    #     pop = population(prob=udp, size=100)
+    #     algo = algorithm(nsga2(gen=300))
+    #     pop = algo.evolve(pop)
+    #     fits, vectors = pop.get_f(), pop.get_x()
+    #     ndf, dl, dc, ndr = fast_non_dominated_sorting(fits)
+    #     result_x = vectors[ndf[0]]
+    #     result_fx = fits[ndf[0]]
+    #     return result_x, result_fx
+    #
+    #     return 0
+    #
+    # def bounds_format_adapter(self, bounds):
+    #     bounds = np.array(bounds)
+    #     bounds_correct_format = []
+    #     for b in range(bounds.shape[0]):
+    #         bounds_correct_format.append(list(bounds[:, b]))
+    #     return bounds_correct_format
+    #
+    # def mean_prediction_model(self, X, model):
+    #     def prediction(X):
+    #         X = np.atleast_2d(X)
+    #
+    #         mu_x = self.model.posterior_mean(X)
+    #         mu_x = np.vstack(mu_x).T
+    #         return -mu_x
+    #     return prediction
 
     def MC_expected_improvement_constrained(self, X, offset=1e-4):
         X = np.atleast_2d(X)
@@ -503,10 +541,13 @@ class Last_Step():
 
         #training GP
         X_train = self.model.get_X_values()
+        # self.Generate_Pareto_Front()
         for it in range(self.n_last_steps):
             Y_train, cost_new = self.objective.evaluate(X_train)
             # print("Y_train",Y_train)
             Y_train = -np.concatenate(Y_train, axis=1)
+            print("Y_train",Y_train)
+
             U_train = self.chevicheff_scalarisation(Y_train)
             U_train = np.log([U_train.reshape((len(U_train),1))])
 
@@ -772,4 +813,28 @@ class Last_Step():
         return -Pdom
 
 
+class GA:
+    # Define objectives
+    def __init__(self, f, bounds):
+        self.f = f
+        self.bounds = bounds
 
+    def fitness(self, x):
+        x = np.atleast_2d(x)
+        output = self.f(x)
+        vect_func_val = []
+        for i in range(len(self.f)):
+            vect_func_val.append(output[:,i])
+        return -np.array(vect_func_val).reshape(-1)
+
+    # Return number of objectives
+    def get_nobj(self):
+        return len(self.f)
+
+    # Return bounds of decision variables
+    def get_bounds(self):
+        return self.bounds  # ([0]*1, [2]*1)
+
+    # Return function name
+    def get_name(self):
+        return "INNER OPTIMISATION PROBLEM"

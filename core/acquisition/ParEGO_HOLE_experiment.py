@@ -145,7 +145,7 @@ def HOLE_function_caller_test(rep):
 
 # for rep in range(10):
 #  function_caller_test_function_2_penalty(rep)
-# HOLE_function_caller_test(rep=16)
+HOLE_function_caller_test(rep=16)
 # print("ready")
 
 
