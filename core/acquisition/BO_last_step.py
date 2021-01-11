@@ -30,7 +30,7 @@ class Last_Step():
             self.data["w" + str(w)] = np.array([])
 
 
-        self.n_last_steps = 2
+        self.n_last_steps = 1
         self.path = path
 
         self.method = "parEGO"
@@ -290,20 +290,28 @@ class Last_Step():
             out = uval.reshape(-1)
         return out
 
-    def chevicheff_scalarisation(self, f):
+    def chevicheff_scalarisation(self, f, w=None):
         y = f
-        w = self.weight
+
+        if w is None:
+            w = self.weight
+
+        w = np.atleast_2d(w)
         if len(f.shape) == 3:
             w = np.repeat(w[:, :, np.newaxis], f.shape[2], axis=2)
-            print("w", w.shape)
+
             scaled_vectors = w * y  # np.multiply(w, y)
-            print("scaled_vectors", scaled_vectors)
+
             utility = np.max(scaled_vectors, axis=1)
-            print("utility", utility)
+
             return utility
         else:
-            scaled_vectors = np.multiply(w, y)
-            return np.max(scaled_vectors, axis=1)
+            utility = []
+            for weights in w:
+                weights = np.atleast_2d(weights)
+                scaled_vectors = np.multiply(weights, y)
+                utility.append(np.max(scaled_vectors, axis=1))
+            return np.array(utility).reshape(-1)
 
 
     def compute_batch(self, **kwargs):
@@ -462,44 +470,50 @@ class Last_Step():
         self.store_results(recommended_x)
         return recommended_x, 0
 
-    # def Generate_Pareto_Front(self):
-    #     X_train = self.model.get_X_values()
-    #
-    #     Y_train, cost_new = self.objective.evaluate(X_train)
-    #     model = multi_outputGP(output_dim=2, noise_var=[1e-6,1e-6] , exact_feval=[True,True] )
-    #     self._update_model(X_train, Y_train, model=model)
-    #     GP_y_predictions  = self.mean_prediction_model(X_train,model)
-    #
-    #
-    #     bounds = self.space.get_continuous_bounds()
-    #     bounds = self.bounds_format_adapter(bounds)
-    #     udp = GA(f=GP_y_predictions, bounds=bounds)
-    #     pop = population(prob=udp, size=100)
-    #     algo = algorithm(nsga2(gen=300))
-    #     pop = algo.evolve(pop)
-    #     fits, vectors = pop.get_f(), pop.get_x()
-    #     ndf, dl, dc, ndr = fast_non_dominated_sorting(fits)
-    #     result_x = vectors[ndf[0]]
-    #     result_fx = fits[ndf[0]]
-    #     return result_x, result_fx
-    #
-    #     return 0
-    #
-    # def bounds_format_adapter(self, bounds):
-    #     bounds = np.array(bounds)
-    #     bounds_correct_format = []
-    #     for b in range(bounds.shape[0]):
-    #         bounds_correct_format.append(list(bounds[:, b]))
-    #     return bounds_correct_format
-    #
-    # def mean_prediction_model(self, X, model):
-    #     def prediction(X):
-    #         X = np.atleast_2d(X)
-    #
-    #         mu_x = self.model.posterior_mean(X)
-    #         mu_x = np.vstack(mu_x).T
-    #         return -mu_x
-    #     return prediction
+    def Generate_Pareto_Front(self):
+        X_train = self.model.get_X_values()
+
+        Y_train, cost_new = self.objective.evaluate(X_train)
+        model = multi_outputGP(output_dim=2, noise_var=[1e-6,1e-6] , exact_feval=[True,True] )
+        self._update_model(X_train, Y_train, model=model)
+        GP_y_predictions  = self.mean_prediction_model(X_train,model)
+
+
+        bounds = self.space.get_continuous_bounds()
+        bounds = self.bounds_format_adapter(bounds)
+        udp = GA(f=GP_y_predictions, bounds=bounds, n_obj=len(Y_train))
+        pop = population(prob=udp, size=100)
+        algo = algorithm(nsga2(gen=300))
+        pop = algo.evolve(pop)
+        fits, vectors = pop.get_f(), pop.get_x()
+        ndf, dl, dc, ndr = fast_non_dominated_sorting(fits)
+        result_x = vectors[ndf[0]]
+        result_fx = fits[ndf[0]]
+        # X_plot = GPyOpt.experiment_design.initial_design('latin', self.space, 5000)
+        # plot_y = GP_y_predictions(X_plot)
+        #
+        # plt.scatter(-plot_y[:,0], -plot_y[:,1], color="red")
+        # plt.scatter(result_fx[:, 0], result_fx[:, 1], color="blue")
+        # plt.show()
+
+        return result_fx, GP_y_predictions
+
+
+    def bounds_format_adapter(self, bounds):
+        bounds = np.array(bounds)
+        bounds_correct_format = []
+        for b in range(bounds.shape[0]):
+            bounds_correct_format.append(list(bounds[:, b]))
+        return bounds_correct_format
+
+    def mean_prediction_model(self, X, model):
+        def prediction(X):
+            X = np.atleast_2d(X)
+
+            mu_x = model.posterior_mean(X)
+            mu_x = np.vstack(mu_x).T
+            return mu_x
+        return prediction
 
     def MC_expected_improvement_constrained(self, X, offset=1e-4):
         X = np.atleast_2d(X)
@@ -537,18 +551,57 @@ class Last_Step():
             print("ei", ei)
             return -np.array(ei).reshape(-1)
 
+    def solve_inverse_problem(self, best_found_val, PF):
+        # print("best_found_val",best_found_val.shape,)
+        def loss(w):
+
+            if np.any(w<np.zeros(w.shape)):
+                return np.ones(w.shape[0]) * 9e99
+            else:
+                #Calculate choosen solution under a weight vector
+                #compare the chosen solution with the actual one
+                #calculate distance between two
+                w = np.atleast_2d(w)
+                Euclidian_distance = []
+                for weights in w:
+                    weights = weights/np.sum(weights)
+                    Utility = self.chevicheff_scalarisation(PF, w=weights)
+                    # print("Utility shape", Utility.shape, "PF" ,PF.shape)
+                    simulated_solution = PF[np.argmin(Utility)]
+                    Euclidian_distance.append(np.sum((simulated_solution - best_found_val)**2.0))
+                return np.array(Euclidian_distance).reshape(-1)
+
+
+        Xd = np.random.random((500, PF.shape[1]))
+        Loss_sol = loss(Xd)
+        estimated_top_X = Xd[np.argmin(Loss_sol)]
+        estimated_top_X = np.atleast_2d(estimated_top_X)
+        # print("estimated_top_X",estimated_top_X)
+        # print("M_X_i",M_X_i)
+        # print("estimated_top_X", estimated_top_X)
+        recommended_w= [minimize(loss, x_discrete, method='Nelder-Mead').x for x_discrete in
+                   estimated_top_X]
+        recommended_w = recommended_w/np.sum(recommended_w)
+        # print("recommended_w, _",recommended_w)
+        # raise
+        return recommended_w
+
     def parEGO_method(self):
 
         #training GP
         X_train = self.model.get_X_values()
-        # self.Generate_Pareto_Front()
+        PF, model_yspace = self.Generate_Pareto_Front() #generate pareto front
+        Utility_PF =  self.chevicheff_scalarisation(PF) #dm picks a solution
+        yc = PF[np.argmin(Utility_PF)]
+        w_estimated = self.solve_inverse_problem(best_found_val = yc, PF =PF)
+        # raise
         for it in range(self.n_last_steps):
             Y_train, cost_new = self.objective.evaluate(X_train)
             # print("Y_train",Y_train)
             Y_train = -np.concatenate(Y_train, axis=1)
             print("Y_train",Y_train)
 
-            U_train = self.chevicheff_scalarisation(Y_train)
+            U_train = self.chevicheff_scalarisation(Y_train, w=w_estimated)
             U_train = np.log([U_train.reshape((len(U_train),1))])
 
 
@@ -815,21 +868,21 @@ class Last_Step():
 
 class GA:
     # Define objectives
-    def __init__(self, f, bounds):
+    def __init__(self, f, bounds, n_obj):
         self.f = f
         self.bounds = bounds
-
+        self.n_obj = n_obj
     def fitness(self, x):
         x = np.atleast_2d(x)
         output = self.f(x)
         vect_func_val = []
-        for i in range(len(self.f)):
+        for i in range(self.n_obj):
             vect_func_val.append(output[:,i])
         return -np.array(vect_func_val).reshape(-1)
 
     # Return number of objectives
     def get_nobj(self):
-        return len(self.f)
+        return self.n_obj
 
     # Return bounds of decision variables
     def get_bounds(self):

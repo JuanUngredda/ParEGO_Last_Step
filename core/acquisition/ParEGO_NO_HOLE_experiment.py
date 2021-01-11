@@ -31,7 +31,7 @@ def NO_HOLE_function_caller_test(rep):
     alpha =1.95
     np.random.seed(rep+20)
     folder = "RESULTS"
-    subfolder = "NO_HOLE_ParEGO_utility_LS2"
+    subfolder = "NO_HOLE_ParEGO_utility_LS_EA"
     cwd = os.getcwd()
     path = cwd + "/" + folder + "/"+subfolder
 
@@ -50,7 +50,7 @@ def NO_HOLE_function_caller_test(rep):
     #c2 = MultiObjective([test_c2])
     # --- Space
     #define space of variables
-    space =  GPyOpt.Design_space(space =[{'name': 'var_1', 'type': 'continuous', 'domain': (-1.0, 1.0)},{'name': 'var_2', 'ty pe': 'continuous', 'domain': (-1.0, 1.0)}])#GPyOpt.Design_space(space =[{'name': 'var_1', 'type': 'continuous', 'domain': (0,100)}])#
+    space =  GPyOpt.Design_space(space =[{'name': 'var_1', 'type': 'continuous', 'domain': (-1.0, 1.0)},{'name': 'var_2', 'type': 'continuous', 'domain': (-1.0, 1.0)}])#GPyOpt.Design_space(space =[{'name': 'var_1', 'type': 'continuous', 'domain': (0,100)}])#
     n_f = 1
     n_c = 0
     input_d = 2
@@ -145,7 +145,7 @@ def NO_HOLE_function_caller_test(rep):
 
 # for rep in range(10):
 #  function_caller_test_function_2_penalty(rep)
-# POL_function_caller_test(rep=16)
+# NO_HOLE_function_caller_test(rep=16)
 print("ready")
 
 
