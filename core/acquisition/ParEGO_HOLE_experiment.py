@@ -31,7 +31,7 @@ def HOLE_function_caller_test(rep):
     alpha =1.95
     np.random.seed(rep)
     folder = "RESULTS"
-    subfolder = "HOLE_ParEGO_utility_LS2"
+    subfolder = "HOLE_ParEGO_utilityDM_Lin_utilityAlg_Tche"
     cwd = os.getcwd()
     path = cwd + "/" + folder + "/"+subfolder
 
@@ -145,7 +145,7 @@ def HOLE_function_caller_test(rep):
 
 # for rep in range(10):
 #  function_caller_test_function_2_penalty(rep)
-HOLE_function_caller_test(rep=16)
-# print("ready")
+# HOLE_function_caller_test(rep=16)
+print("ready")
 
 

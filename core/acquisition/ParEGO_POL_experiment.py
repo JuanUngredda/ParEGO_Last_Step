@@ -31,7 +31,7 @@ def POL_function_caller_test(rep):
     alpha =1.95
     np.random.seed(rep)
     folder = "RESULTS"
-    subfolder = "POL_ParEGO_utility_LS2"
+    subfolder = "POL_ParEGO_utilityDM_Lin_utilityAlg_Tche"
     cwd = os.getcwd()
     path = cwd + "/" + folder + "/"+subfolder
 

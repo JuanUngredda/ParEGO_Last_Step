@@ -8,6 +8,7 @@ from multi_objective import MultiObjective
 from multi_outputGP import multi_outputGP
 from scipy.optimize import minimize
 from pygmo import *
+
 class Last_Step():
     def __init__(self, model_f, model_c, true_f, true_c, n_f, n_c, acquisition_optimiser,acquisition_f,space, seed=None, prior_gen = None,path=None):
         self.model = model_f
@@ -36,7 +37,11 @@ class Last_Step():
         self.method = "parEGO"
 
         self.space = space
+
+        self.DM_utility = self.linear_utility
+        self.Alg_utility = self.chevicheff_scalarisation
         self.true_best_x, self.true_best_val = self.acq_opt.optimize_inner_func(f=self.top_true_utility)
+
 
         # X_plot = GPyOpt.experiment_design.initial_design('latin', space, 10000)
         # fig, axs = plt.subplots(2, 2)
@@ -83,7 +88,7 @@ class Last_Step():
             C_recommended = np.concatenate(C_recommended, axis=1)
 
             feasable_samples = np.product(C_recommended < 0, axis=1, dtype=bool)
-            uval = self.chevicheff_scalarisation(Y_recommended)
+            uval = self.DM_utility(Y_recommended, w=self.weight)
             uval= uval.reshape(-1)
             uval[np.logical_not(feasable_samples)] = 0
             out = uval
@@ -93,16 +98,39 @@ class Last_Step():
 
             Y_recommended = -np.concatenate(Y_recommended, axis=1)
 
-            uval = self.chevicheff_scalarisation(Y_recommended)
+            uval = self.DM_utility(Y_recommended, w=self.weight)
             out = uval.reshape(-1) #* feasable_samples.reshape(-1)
         print(" np.array(out).reshape(-1)", np.array(out).reshape(-1), type(out))
         return np.array(out).reshape(-1)
 
-    def utility(self, objectives):
-        y = np.abs(objectives)
-        w = self.weight
+
+    def linear_utility(self, f, w):
+        y = f
+        w = np.atleast_2d(w)
         scaled_vectors = np.multiply(w, y)
         return np.sum(scaled_vectors, axis=1)
+
+
+    def chevicheff_scalarisation(self, f, w):
+        y = f
+        w = np.atleast_2d(w)
+        if len(f.shape) == 3:
+            w = np.repeat(w[:, :, np.newaxis], f.shape[2], axis=2)
+
+            scaled_vectors = w * y  # np.multiply(w, y)
+
+            utility = np.max(scaled_vectors, axis=1)
+
+            return utility
+        else:
+            utility = []
+            for weights in w:
+                weights = np.atleast_2d(weights)
+                scaled_vectors = np.multiply(weights, y)
+                utility.append(np.max(scaled_vectors, axis=1))
+            return np.array(utility).reshape(-1)
+
+
 
     def prior_sample_generator(self, n_samples=1, seed=None):
         if seed is None:
@@ -290,30 +318,6 @@ class Last_Step():
             out = uval.reshape(-1)
         return out
 
-    def chevicheff_scalarisation(self, f, w=None):
-        y = f
-
-        if w is None:
-            w = self.weight
-
-        w = np.atleast_2d(w)
-        if len(f.shape) == 3:
-            w = np.repeat(w[:, :, np.newaxis], f.shape[2], axis=2)
-
-            scaled_vectors = w * y  # np.multiply(w, y)
-
-            utility = np.max(scaled_vectors, axis=1)
-
-            return utility
-        else:
-            utility = []
-            for weights in w:
-                weights = np.atleast_2d(weights)
-                scaled_vectors = np.multiply(weights, y)
-                utility.append(np.max(scaled_vectors, axis=1))
-            return np.array(utility).reshape(-1)
-
-
     def compute_batch(self, **kwargs):
 
         if self.method == "pdominance":
@@ -498,7 +502,6 @@ class Last_Step():
 
         return result_fx, GP_y_predictions
 
-
     def bounds_format_adapter(self, bounds):
         bounds = np.array(bounds)
         bounds_correct_format = []
@@ -533,7 +536,7 @@ class Last_Step():
         yn = mu + sigma * Z
 
         print("yn", yn.shape)
-        un = -self.chevicheff_scalarisation(yn)
+        un = -self.Alg_utility(yn)
         print("un", un.shape)
         mu_sample_opt = -self.base_utility  # max value
         imp = un - mu_sample_opt
@@ -565,7 +568,7 @@ class Last_Step():
                 Euclidian_distance = []
                 for weights in w:
                     weights = weights/np.sum(weights)
-                    Utility = self.chevicheff_scalarisation(PF, w=weights)
+                    Utility = self.Alg_utility(PF, w=weights)
                     # print("Utility shape", Utility.shape, "PF" ,PF.shape)
                     simulated_solution = PF[np.argmin(Utility)]
                     Euclidian_distance.append(np.sum((simulated_solution - best_found_val)**2.0))
@@ -591,17 +594,20 @@ class Last_Step():
         #training GP
         X_train = self.model.get_X_values()
         PF, model_yspace = self.Generate_Pareto_Front() #generate pareto front
-        Utility_PF =  self.chevicheff_scalarisation(PF) #dm picks a solution
+        Utility_PF =  self.DM_utility(PF, w=self.weight) #dm picks a solution
         yc = PF[np.argmin(Utility_PF)]
         w_estimated = self.solve_inverse_problem(best_found_val = yc, PF =PF)
-        # raise
+        Utility_learnt_solution = self.Alg_utility(PF, w=w_estimated)
+        y_learnt = PF[np.argmin(Utility_learnt_solution )]
+        print("y_learnt",y_learnt,"yc", yc)
+        print("true weight", self.weight, "estimated weight", w_estimated)
         for it in range(self.n_last_steps):
             Y_train, cost_new = self.objective.evaluate(X_train)
             # print("Y_train",Y_train)
             Y_train = -np.concatenate(Y_train, axis=1)
             print("Y_train",Y_train)
 
-            U_train = self.chevicheff_scalarisation(Y_train, w=w_estimated)
+            U_train = self.Alg_utility(Y_train, w=w_estimated)
             U_train = np.log([U_train.reshape((len(U_train),1))])
 
 
@@ -613,7 +619,7 @@ class Last_Step():
             feasable_samples, feasable_Y = self.filter_Y_samples()
             if np.sum(feasable_samples)>0:
                 # print("feasable_Y",feasable_Y)
-                utility_sampled_designs = self.chevicheff_scalarisation(feasable_Y)
+                utility_sampled_designs = self.Alg_utility(feasable_Y, w=w_estimated)
                 # print("U_train",U_train)
                 # print("utility_sampled_designs",utility_sampled_designs)
 
@@ -671,8 +677,7 @@ class Last_Step():
                 axs[1, 0].scatter(feasable_Y[:,0], feasable_Y[:,1], color="magenta")
                 axs[1, 0].scatter(mu_recommended[:, 0], mu_recommended[:, 1], color="red")
 
-
-                utility_underlying_func = self.chevicheff_scalarisation(-muX_inner)
+                utility_underlying_func = self.Alg_utility(-muX_inner, w=w_estimated)
 
                 axs[0, 1].set_title("utility_plot true")
                 axs[0, 1].scatter(Feas_muX[:, 0], Feas_muX[:, 1], c=np.array(utility_underlying_func).reshape(-1))
@@ -769,23 +774,23 @@ class Last_Step():
             C_recommended = np.concatenate(C_recommended, axis=1)
 
             feasable_samples = np.product(C_recommended < 0, axis=1)
-            uval = self.chevicheff_scalarisation(Y_recommended)
+            uval = self.DM_utility(Y_recommended, w=self.weight)
             out = -uval.reshape(-1) * feasable_samples.reshape(-1)
 
         else:
             Y_recommended, cost_new = self.objective.evaluate(recommended_x)
             Y_recommended = -np.concatenate(Y_recommended, axis=1)
-            uval = self.chevicheff_scalarisation(Y_recommended)
+            uval = self.DM_utility(Y_recommended, w=self.weight)
             out = -uval.reshape(-1)
 
 
-        self.chevicheff_scalarisation(np.array(self.model.posterior_mean(recommended_x)).reshape(-1))
+        # self.DM_utility(np.array(self.model.posterior_mean(recommended_x)).reshape(-1))
         # print("recommended_x)",recommended_x,"metamodel Y",self.model.posterior_mean(recommended_x).reshape(-1),"utility simulated",self.chevicheff_scalarisation(np.array(self.model.posterior_mean(recommended_x)).reshape(-1)),"Y_recommended",Y_recommended,"feasable_samples.reshape(-1)",feasable_samples.reshape(-1),"uval",uval)
 
 
         if len(feasable_Y )>0:
-            uval_sampled = -np.min(self.chevicheff_scalarisation(feasable_Y))
-            print("sampled utilities", self.chevicheff_scalarisation(feasable_Y))
+            uval_sampled = -np.min(self.DM_utility(feasable_Y, w=self.weight))
+            print("sampled utilities", self.DM_utility(feasable_Y, w=self.weight))
             print("feasable_Y",feasable_Y, "utility sampled", uval_sampled)
             print("Y_recommended ",Y_recommended , "out", out)
 
@@ -810,8 +815,6 @@ class Last_Step():
                 os.makedirs(self.path +"/" + results_folder  )
 
             gen_file.to_csv(path_or_buf=path)
-
-
 
     def inner_opt(self, X):
         X = np.atleast_2d(X)
