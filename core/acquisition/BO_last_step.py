@@ -10,7 +10,7 @@ from scipy.optimize import minimize
 from pygmo import *
 
 class Last_Step():
-    def __init__(self, model_f, model_c, true_f, true_c, n_f, n_c, acquisition_optimiser,acquisition_f,space, seed=None, prior_gen = None,path=None):
+    def __init__(self, model_f, model_c, true_f, true_c, n_f, n_c, acquisition_optimiser,acquisition_f,space, B=1, seed=None, prior_gen = None,path=None):
         self.model = model_f
         self.model_c = model_c
         self.objective = true_f
@@ -21,7 +21,6 @@ class Last_Step():
         self.seed=seed
         self.weight = prior_gen(n_samples=1, seed=seed) #np.array([[0.5,0.5]])#
         print("self.weight",self.weight)
-
         self.acquisition_f = acquisition_f
         self.data = {}
         self.data["Utility"] = np.array([])
@@ -31,7 +30,7 @@ class Last_Step():
             self.data["w" + str(w)] = np.array([])
 
 
-        self.n_last_steps = 1
+        self.n_last_steps = B
         self.path = path
 
         self.method = "parEGO"
@@ -42,7 +41,8 @@ class Last_Step():
         self.Alg_utility = self.chevicheff_scalarisation
         self.true_best_x, self.true_best_val = self.acq_opt.optimize_inner_func(f=self.top_true_utility)
 
-
+        print("self.true_best_val",self.true_best_val)
+        # raise
         # X_plot = GPyOpt.experiment_design.initial_design('latin', space, 10000)
         # fig, axs = plt.subplots(2, 2)
         #
@@ -79,7 +79,7 @@ class Last_Step():
 
     def top_true_utility(self,X):
         X = np.atleast_2d(X)
-        print("X",X)
+        # print("X",X)
         if self.constraint is not None:
             Y_recommended, cost_new = self.objective.evaluate(X)
             C_recommended, C_cost_new = self.constraint.evaluate(X)
@@ -95,20 +95,21 @@ class Last_Step():
             #out = uval.reshape(-1) * feasable_samples.reshape(-1)
         else:
             Y_recommended, cost_new = self.objective.evaluate(X)
-
             Y_recommended = -np.concatenate(Y_recommended, axis=1)
-
             uval = self.DM_utility(Y_recommended, w=self.weight)
             out = uval.reshape(-1) #* feasable_samples.reshape(-1)
-        print(" np.array(out).reshape(-1)", np.array(out).reshape(-1), type(out))
+        # print(" np.array(out).reshape(-1)", np.array(out).reshape(-1), type(out))
         return np.array(out).reshape(-1)
 
 
     def linear_utility(self, f, w):
+
         y = f
         w = np.atleast_2d(w)
         scaled_vectors = np.multiply(w, y)
-        return np.sum(scaled_vectors, axis=1)
+        u = np.sum(scaled_vectors, axis=1).reshape(-1)
+        # print("f", f, "w", w, "u", u)
+        return u
 
 
     def chevicheff_scalarisation(self, f, w):
@@ -129,8 +130,6 @@ class Last_Step():
                 scaled_vectors = np.multiply(weights, y)
                 utility.append(np.max(scaled_vectors, axis=1))
             return np.array(utility).reshape(-1)
-
-
 
     def prior_sample_generator(self, n_samples=1, seed=None):
         if seed is None:
@@ -602,6 +601,7 @@ class Last_Step():
         print("y_learnt",y_learnt,"yc", yc)
         print("true weight", self.weight, "estimated weight", w_estimated)
         for it in range(self.n_last_steps):
+            print("Last step acquired samples Main Alg:", it)
             Y_train, cost_new = self.objective.evaluate(X_train)
             # print("Y_train",Y_train)
             Y_train = -np.concatenate(Y_train, axis=1)
@@ -609,7 +609,6 @@ class Last_Step():
 
             U_train = self.Alg_utility(Y_train, w=w_estimated)
             U_train = np.log([U_train.reshape((len(U_train),1))])
-
 
             self.model_U = multi_outputGP(output_dim=1, noise_var=[1e-6] , exact_feval=[True] )
             print("model_U,", self.model_U.kernel)
@@ -713,7 +712,7 @@ class Last_Step():
 
             X_train = np.concatenate((X_train,recommended_x))
 
-        self.store_results(np.atleast_2d(recommended_x))
+            self.store_results(np.atleast_2d(recommended_x))
 
         return recommended_x, 0
 

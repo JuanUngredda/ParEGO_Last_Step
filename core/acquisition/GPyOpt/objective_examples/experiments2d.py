@@ -243,7 +243,7 @@ class NO_HOLE(function2d):
 
 
             fval = (t + 1)**2.0 + a #+ b* np.exp( -c * ( t - d) ** 2.0)
-            print("fval", fval)
+            # print("fval", fval)
             return -fval.reshape(n, 1)
 
     def f2(self, X, true_val=False):
@@ -284,7 +284,7 @@ class NO_HOLE(function2d):
             c = self.q / (d ** 2.0)
 
             fval = (t - 1) **2.0 + a #+ b * np.exp(-c * (t + d) ** 2.0)
-            print("fval", fval)
+            # print("fval", fval)
             return -fval.reshape(n, 1)
 
 class HOLE(function2d):

@@ -10,7 +10,7 @@ from continuous_KG import KG
 from ParEGO_acquisition import ParEGO
 #from Constrained_U_KG import AcquisitionUKG
 # from U_KG import AcquisitionUKG
-from bayesian_optimisation import BO
+from bayesian_optimisation_variable_Last_Step_exp import BO
 import pandas as pd
 import os
 
@@ -30,8 +30,18 @@ def HOLE_function_caller_test(rep):
     noise = 1e-6
     alpha =1.95
     np.random.seed(rep)
+
+    n_f = 1
+    n_c = 0
+    input_d = 2
+    m =2
+    Overall_Budget = 100
+    Last_Step_Budget = 5
+    Main_Alg_Budget = Overall_Budget - Last_Step_Budget
+    n_initial_design = 2 * (input_d + 1)
+
     folder = "RESULTS"
-    subfolder = "HOLE_ParEGO_utilityDM_Lin_utilityAlg_Tche"
+    subfolder = "HOLE_ParEGO_Main_"+str(Main_Alg_Budget)+"_"+"Last_Step_Budget_"+str(Last_Step_Budget)
     cwd = os.getcwd()
     path = cwd + "/" + folder + "/"+subfolder
 
@@ -51,10 +61,9 @@ def HOLE_function_caller_test(rep):
     # --- Space
     #define space of variables
     space =  GPyOpt.Design_space(space =[{'name': 'var_1', 'type': 'continuous', 'domain': (-1.0, 1.0)},{'name': 'var_2', 'type': 'continuous', 'domain': (-1.0, 1.0)}])#GPyOpt.Design_space(space =[{'name': 'var_1', 'type': 'continuous', 'domain': (0,100)}])#
-    n_f = 1
-    n_c = 0
-    input_d = 2
-    m =2
+
+
+
 
     model_f = multi_outputGP(output_dim = n_f,   noise_var=[noise]*n_f, exact_feval=[True]*n_f)
     #model_c = multi_outputGP(output_dim = n_c,  noise_var=[1e-7]*n_c, exact_feval=[True]*n_c)
@@ -65,7 +74,7 @@ def HOLE_function_caller_test(rep):
 
     # --- Initial design
     #initial design
-    initial_design = GPyOpt.experiment_design.initial_design('latin', space, 2*(input_d+1))
+    initial_design = GPyOpt.experiment_design.initial_design('latin', space, n_initial_design)
 
     # --- Utility function
     def prior_sample_generator(n_samples=1, seed=None):
@@ -116,15 +125,15 @@ def HOLE_function_caller_test(rep):
     #acquisition = HVI(model=model_f, model_c=model_c , alpha=alpha, space=space, optimizer = acq_opt)
     acquisition = ParEGO(model=model_f, model_c=None , alpha=alpha, space=space, NSGA_based=False,optimizer = acq_opt, utility= U, true_func=f)
 
-    last_step_acquisition = Last_Step(model_f=model_f, model_c=None , true_f=f, true_c=None,n_f=m, n_c=n_c, acquisition_optimiser = acq_opt, acquisition_f=acquisition,seed=rep,prior_gen=prior_sample_generator, space=space, path=path)
+    last_step_acquisition = Last_Step(model_f=model_f, model_c=None , true_f=f, true_c=None,n_f=m, n_c=n_c, B=Last_Step_Budget,acquisition_optimiser = acq_opt, acquisition_f=acquisition,seed=rep,prior_gen=prior_sample_generator, space=space, path=path)
 
     evaluator = GPyOpt.core.evaluators.Sequential(acquisition)
     bo = BO(model_f, None, space, f, None, acquisition, evaluator, initial_design,  ref_point=ref_point)
 
 
-    max_iter  = 100
+
     # print("Finished Initialization")
-    X, Y, C, Opportunity_cost = bo.run_optimization(max_iter = max_iter,  rep=rep, last_step_evaluator=last_step_acquisition, path=path, verbosity=False)
+    X, Y, C, Opportunity_cost = bo.run_optimization(max_iter = Main_Alg_Budget,  rep=rep, last_step_evaluator=last_step_acquisition, path=path, verbosity=False)
     print("Code Ended")
 
     # data = {}

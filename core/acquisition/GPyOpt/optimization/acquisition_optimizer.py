@@ -148,7 +148,7 @@ class AcquisitionOptimizer(object):
         return x_min, fx_min
     
     
-    def optimize_inner_func(self, f=None, df=None, f_df=None, duplicate_manager=None, num_samples=60, True_GP=None, include_point=None):
+    def optimize_inner_func(self, f=None, df=None, f_df=None, duplicate_manager=None, num_samples=500, True_GP=None, include_point=None):
         """
         Optimizes the input function.
 
@@ -233,6 +233,7 @@ class AcquisitionOptimizer(object):
         # print("value_anchor points inner func", f(anchor_points))
 
         ################################REACTIVATE
+        print("anchor_points", anchor_points)
         optimized_points = [apply_optimizer(self.inner_optimizer, a.flatten(), f=f, df=None, f_df=f_df, duplicate_manager=duplicate_manager, context_manager=self.context_manager, space = self.space) for a in anchor_points]
         x_min, fx_min = min(optimized_points, key=lambda t:t[1])
         self.inner_anchor_points = x_min
