@@ -36,7 +36,7 @@ def HOLE_function_caller_test(rep):
     input_d = 2
     m =2
     Overall_Budget = 100
-    Last_Step_Budget = 5
+    Last_Step_Budget = 1
     Main_Alg_Budget = Overall_Budget - Last_Step_Budget
     n_initial_design = 2 * (input_d + 1)
 
