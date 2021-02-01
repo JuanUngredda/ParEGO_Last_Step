@@ -29,6 +29,7 @@ def POL_function_caller_test(rep):
     penalty =0
     noise = 1e-6
     alpha =1.95
+    rep = rep+50
     np.random.seed(rep)
     folder = "RESULTS"
     subfolder = "POL_ParEGO_utilityDM_Lin_utilityAlg_Tche"

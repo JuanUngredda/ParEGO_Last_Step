@@ -483,18 +483,18 @@ class BO(object):
                 self.store_results(feasable_Y)
             else:
                 suggested_sample = self._compute_final_evaluations()
-                self.suggested_final_evaluation = suggested_sample
-
-                Y_new, cost_new = self.objective.evaluate(suggested_sample)
-                Y_new = np.concatenate(Y_new, axis=1)
-
-                X_train = self.model.get_X_values()
-                sampled_Y , cost_new = self.objective.evaluate(X_train)
-                sampled_Y = np.concatenate(sampled_Y, axis=1)
-                sampled_Y = np.vstack((sampled_Y, Y_new))
-
-                feasable_Y = sampled_Y
-                self.store_results(feasable_Y)
+                # self.suggested_final_evaluation = suggested_sample
+                #
+                # Y_new, cost_new = self.objective.evaluate(suggested_sample)
+                # Y_new = np.concatenate(Y_new, axis=1)
+                #
+                # X_train = self.model.get_X_values()
+                # sampled_Y , cost_new = self.objective.evaluate(X_train)
+                # sampled_Y = np.concatenate(sampled_Y, axis=1)
+                # sampled_Y = np.vstack((sampled_Y, Y_new))
+                #
+                # feasable_Y = sampled_Y
+                # self.store_results(feasable_Y)
 
 
 
