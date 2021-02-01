@@ -96,7 +96,7 @@ class ParEGO(AcquisitionBase):
             ei = imp * norm.cdf(Z) + sigma * norm.pdf(Z)
             ei[sigma == 0.0] = 0.0
 
-        print("ei", ei)
+        # print("ei", ei)
         return np.array(ei).reshape(-1)
 
     def _compute_acq_withGradients(self, X):

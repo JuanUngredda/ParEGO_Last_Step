@@ -10,7 +10,7 @@ from scipy.optimize import minimize
 from pygmo import *
 
 class Last_Step():
-    def __init__(self, model_f, model_c, true_f, true_c, n_f, n_c, acquisition_optimiser,acquisition_f,space, B=1, seed=None, prior_gen = None,path=None):
+    def __init__(self, model_f, model_c, true_f, true_c, n_f, n_c, acquisition_optimiser,acquisition_f,space, B=1, seed=None, weight = None,path=None):
         self.model = model_f
         self.model_c = model_c
         self.objective = true_f
@@ -19,7 +19,7 @@ class Last_Step():
         self.n_f = n_f
         self.n_c = n_c
         self.seed=seed
-        self.weight = prior_gen(n_samples=1, seed=seed) #np.array([[0.5,0.5]])#
+        self.weight = weight #np.array([[0.5,0.5]])#
         print("self.weight",self.weight)
         self.acquisition_f = acquisition_f
         self.data = {}
@@ -713,7 +713,7 @@ class Last_Step():
             X_train = np.concatenate((X_train,recommended_x))
 
             self.store_results(np.atleast_2d(recommended_x))
-
+            raise
         return recommended_x, 0
 
     def expected_improvement_constrained(self, X, offset=1e-4, verbose=False):

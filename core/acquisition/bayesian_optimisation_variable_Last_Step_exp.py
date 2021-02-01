@@ -199,7 +199,7 @@ class BO(object):
         self._update_model()
         while (self.max_iter > self.num_acquisitions ):
 
-
+            self.optimize_final_evaluation()
             print("maKG optimizer")
             start = time.time()
 
@@ -230,7 +230,8 @@ class BO(object):
             print("num acquired samples Main Alg: ", self.num_acquisitions)
             print("self.X, self.Y, self.C , self.Opportunity_Cost",self.X, self.Y, self.C , self.Opportunity_Cost)
 
-        self.optimize_final_evaluation()
+
+
         return self.X, self.Y, self.C , self.Opportunity_Cost
         # --- Print the desired result in files
         #if self.evaluations_file is not None:
