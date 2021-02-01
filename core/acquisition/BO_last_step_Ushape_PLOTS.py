@@ -647,7 +647,7 @@ class Last_Step():
 
                 recommended_x, _ = self.acq_opt.optimize_inner_func(f=self.expected_improvement_constrained, True_GP=self.model_U,include_point=True)
                 # print("self.base_utility",self.base_utility ,"improvement base", _)
-                plot = False
+                plot = True
                 if plot == True:
                     space = self.space
                     X_plot = GPyOpt.experiment_design.initial_design('latin', space, 5000)
@@ -688,7 +688,7 @@ class Last_Step():
                     axs[1, 0].scatter(feasable_Y[:,0], feasable_Y[:,1], color="magenta")
                     axs[1, 0].scatter(mu_recommended[:, 0], mu_recommended[:, 1], color="red")
 
-                    utility_underlying_func = self.Alg_utility(-muX_inner, w=w_estimated)
+                    utility_underlying_func = self.DM_utility(-muX_inner, w=self.weight)
 
                     axs[0, 1].set_title("utility_plot true")
                     axs[0, 1].scatter(Feas_muX[:, 0], Feas_muX[:, 1], c=np.array(utility_underlying_func).reshape(-1))
