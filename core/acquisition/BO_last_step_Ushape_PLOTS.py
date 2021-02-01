@@ -647,7 +647,7 @@ class Last_Step():
 
                 recommended_x, _ = self.acq_opt.optimize_inner_func(f=self.expected_improvement_constrained, True_GP=self.model_U,include_point=True)
                 # print("self.base_utility",self.base_utility ,"improvement base", _)
-                plot = True
+                plot = False
                 if plot == True:
                     space = self.space
                     X_plot = GPyOpt.experiment_design.initial_design('latin', space, 5000)
