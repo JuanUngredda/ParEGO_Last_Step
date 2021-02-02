@@ -30,7 +30,7 @@ def POL_function_caller_test(rep):
     penalty = 0
     noise = 1e-6
     alpha = 1.95
-    rep = rep + 100
+    rep = rep + 200
     n_f = 1
     n_c = 0
     input_d = 2
