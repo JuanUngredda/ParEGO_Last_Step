@@ -43,7 +43,7 @@ class Last_Step():
 
         print("self.true_best_val",self.true_best_val)
         # raise
-        # X_plot = GPyOpt.experiment_design.initial_design('latin', space, 10000)
+        # X_plot = GPyOpt.experiment_design.initial_design('latin', space, 100)
         # fig, axs = plt.subplots(2, 2)
         #
         #
@@ -76,6 +76,36 @@ class Last_Step():
         # # axs[0, 0].plot(Feas_muX[:, 0], Feas_muX[:, 0] * (self.weight[:, 0] / self.weight[:, 1]))
         # plt.show()
 
+        # bounds = self.space.get_continuous_bounds()
+        # bounds = self.bounds_format_adapter(bounds)
+        # func_eval = self.wrapper(self.objective.evaluate)
+        # udp = GA(f= func_eval, bounds=bounds, n_obj=2)
+        # pop = population(prob=udp, size=248)
+        # algo = algorithm(nsga2(gen=300))
+        # pop = algo.evolve(pop)
+        # fits, vectors = pop.get_f(), pop.get_x()
+        # ndf, dl, dc, ndr = fast_non_dominated_sorting(fits)
+        # result_x = vectors[ndf[0]]
+        # result_fx = fits[ndf[0]]
+        # results_fx = np.array(result_fx)
+        #
+        # data_pf = {}
+        # data_pf["PF1"] =np.array(results_fx[:,0]).reshape(-1)
+        # data_pf["PF2"] =np.array(results_fx[:,1]).reshape(-1)
+        #
+        # gen_file = pd.DataFrame.from_dict(data_pf)
+        # path = "/home/juan/Documents/repos_data/ParEGO_Last_STEP/Paper_PLOTS/Problem_Def_PLOT/PF1.csv"
+        # gen_file.to_csv(path_or_buf=path)
+
+        # raise
+
+    def wrapper(self, f):
+        def changed_func(x):
+            output,c = f(x)
+            output = np.vstack(output).T
+            # print("output", output)
+            return output
+        return changed_func
 
     def top_true_utility(self,X):
         X = np.atleast_2d(X)
@@ -492,13 +522,33 @@ class Last_Step():
         ndf, dl, dc, ndr = fast_non_dominated_sorting(fits)
         result_x = vectors[ndf[0]]
         result_fx = fits[ndf[0]]
-        # X_plot = GPyOpt.experiment_design.initial_design('latin', self.space, 5000)
-        # plot_y = GP_y_predictions(X_plot)
+        # # X_plot = GPyOpt.experiment_design.initial_design('latin', self.space, 5000)
+        # # plot_y = GP_y_predictions(X_plot)
         #
-        # plt.scatter(-plot_y[:,0], -plot_y[:,1], color="red")
+        # # plt.scatter(-plot_y[:,0], -plot_y[:,1], color="red")
         # plt.scatter(result_fx[:, 0], result_fx[:, 1], color="blue")
+        #
         # plt.show()
 
+        # data_pf = {}
+        # data_sampled = {}
+        #
+        # # data_pf["PF1"] =np.array(result_fx[:,0]).reshape(-1)
+        # # data_pf["PF2"] =np.array(result_fx[:,1]).reshape(-1)
+        # Y_train = np.hstack(Y_train)
+        # print("Y_train", Y_train)
+        # data_sampled["Y1"] = np.array(Y_train[:,0]).reshape(-1)
+        # data_sampled["Y2"] = np.array(Y_train[:, 1]).reshape(-1)
+        # gen_file = pd.DataFrame.from_dict(data_sampled)
+        # path = "/home/juan/Documents/repos_data/ParEGO_Last_STEP/Paper_PLOTS/Problem_Def_PLOT/GP_Y_data.csv"
+        # gen_file.to_csv(path_or_buf=path)
+        #
+        #
+        # # gen_file = pd.DataFrame.from_dict(data_pf)
+        # # path = "/home/juan/Documents/repos_data/ParEGO_Last_STEP/Paper_PLOTS/Problem_Def_PLOT/GP_PF1.csv"
+        # # gen_file.to_csv(path_or_buf=path)
+        #
+        # raise
         return result_fx, GP_y_predictions
 
     def bounds_format_adapter(self, bounds):

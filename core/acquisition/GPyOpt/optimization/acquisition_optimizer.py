@@ -148,7 +148,7 @@ class AcquisitionOptimizer(object):
         return x_min, fx_min
     
     
-    def optimize_inner_func(self, f=None, df=None, f_df=None, duplicate_manager=None, num_samples=500, True_GP=None, include_point=None):
+    def optimize_inner_func(self, f=None, df=None, f_df=None, duplicate_manager=None, num_samples=1000, True_GP=None, include_point=None):
         """
         Optimizes the input function.
 

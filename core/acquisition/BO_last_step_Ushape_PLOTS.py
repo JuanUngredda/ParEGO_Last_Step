@@ -43,7 +43,7 @@ class Last_Step():
 
         print("self.true_best_val",self.true_best_val)
         # raise
-        # X_plot = GPyOpt.experiment_design.initial_design('latin', space, 10000)
+        # X_plot = GPyOpt.experiment_design.initial_design('latin', space, 1000000)
         # fig, axs = plt.subplots(2, 2)
         #
         #
@@ -63,19 +63,54 @@ class Last_Step():
         #     Feas_muX = Y_recommended
         #
         # print("Feas_muX ", Feas_muX)
-        # uval = self.chevicheff_scalarisation(Feas_muX)
+        # uval = self.Alg_utility(Feas_muX, w=self.weight)
         #
         # # Pdom = self.probability_domination(X_plot[feasable_mu_index])
         # # print("max", np.max(Pdom), "min", np.min(Pdom))
         # print("BEST_mu",BEST_mu, "self.true_best_val",self.true_best_val)
         # print("weights", self.weight, "uval_discre", np.min(uval))
-        # axs[0,0].scatter(Feas_muX[:, 0], Feas_muX[:, 1], c=np.array(uval).reshape(-1))
-        # # axs[0, 0].scatter(X_plot[:, 0], X_plot[:, 1], c=np.array(uval).reshape(-1))
-        # # axs[0, 0].scatter(-BEST_mu[ 0], -BEST_mu[1], c="red")
         #
-        # # axs[0, 0].plot(Feas_muX[:, 0], Feas_muX[:, 0] * (self.weight[:, 0] / self.weight[:, 1]))
+        # fits = list(Feas_muX)
+        # ndf, dl, dc, ndr = fast_non_dominated_sorting(fits)
+        #
+        # result_fx = np.array(fits)[ndf[0]]
+        #
+        # axs[0 , 0].scatter(Feas_muX[:, 0], Feas_muX[:, 1], c=np.array(uval).reshape(-1))
+        # axs[0, 0].scatter(-BEST_mu[ 0], -BEST_mu[1], c="red")
+        # axs[0, 0].plot(Feas_muX[:, 0], Feas_muX[:, 0] * (self.weight[:, 0] / self.weight[:, 1]))
+        # axs[0,0].scatter(result_fx[:,0], result_fx[:,1], color="red")
         # plt.show()
-
+        #
+        #
+        # self.data_plots_1 = {}
+        # self.data_plots_2 = {}
+        # self.data_plot_3 = {}
+        # self.data_pf = {}
+        #
+        # self.data_plots_1["Utility"] = np.array(uval).reshape(-1)
+        # self.data_plots_1["f1"] = np.array(Feas_muX[:, 0]).reshape(-1)
+        # self.data_plots_1["f2"] = np.array(Feas_muX[:, 1]).reshape(-1)
+        # self.data_plots_2["Best_mu_1"] = np.array(-BEST_mu[ 0]).reshape(-1)
+        # self.data_plots_2["Best_mu_2"] = np.array(-BEST_mu[1]).reshape(-1)
+        # self.data_pf["pf1"] = np.array(result_fx[:,0]).reshape(-1)
+        # self.data_pf["pf2"] = np.array(result_fx[:, 1]).reshape(-1)
+        #
+        # if self.path is not None:
+        #     gen_file = pd.DataFrame.from_dict(self.data)
+        #     results_folder = "Utility_Improvement"
+        #
+        #     path = self.path +"/" + results_folder + '/it_' + str(self.seed) + '.csv'
+        #     if os.path.isdir(self.path +"/" + results_folder  ) == False:
+        #         os.makedirs(self.path +"/" + results_folder  )
+        #
+        # gen_file1 = pd.DataFrame.from_dict(self.data_plots_1)
+        # gen_file2 = pd.DataFrame.from_dict(self.data_plots_2)
+        # gen_file3 = pd.DataFrame.from_dict(self.data_pf)
+        #
+        # gen_file1.to_csv(path_or_buf="/home/juan/Documents/repos_data/ParEGO_Last_STEP/Paper_PLOTS/Problem_Def_PLOT/True_func.csv")
+        # gen_file2.to_csv(path_or_buf="/home/juan/Documents/repos_data/ParEGO_Last_STEP/Paper_PLOTS/Problem_Def_PLOT/best_point.csv")
+        # gen_file3.to_csv(path_or_buf="/home/juan/Documents/repos_data/ParEGO_Last_STEP/Paper_PLOTS/Problem_Def_PLOT/pf.csv")
+        # raise
 
     def top_true_utility(self,X):
         X = np.atleast_2d(X)
@@ -591,7 +626,7 @@ class Last_Step():
     def parEGO_method(self):
         X_train = self.model.get_X_values()
         print("X_train.shape[0]",X_train.shape[0], "self.Overall_Budget",self.Overall_Budget)
-        if X_train.shape[0] < self.Overall_Budget:
+        if (X_train.shape[0] < self.Overall_Budget) | (self.n_last_steps==0) :
             feasable_samples, feasable_Y = self.filter_Y_samples()
 
             recommended_x = X_train[np.argmin(self.DM_utility(feasable_Y, w=self.weight))]

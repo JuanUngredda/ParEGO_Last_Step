@@ -33,15 +33,15 @@ def NO_HOLE_function_caller_test(rep):
     n_c = 0
     input_d = 2
     m = 2
-    Overall_Budget = 100
-    for LS_budget in range(1,99,10):
+    Overall_Budget = 40
+    for LS_budget in [0, 1, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39]:
         np.random.seed(rep)
         Last_Step_Budget = LS_budget
         Main_Alg_Budget = Overall_Budget - Last_Step_Budget
         n_initial_design = 2 * (input_d + 1)
 
         folder = "RESULTS"
-        subfolder = "NO_HOLE_ParEGO_Main_" + str(Main_Alg_Budget) + "_" + "Last_Step_Budget_" + str(Last_Step_Budget)
+        subfolder = "NO_HOLE_ParEGO_Main_" + str(Main_Alg_Budget) + "_" + "Last_Step_Budget_" + str(Last_Step_Budget) +"_Total Budget_"+str(Overall_Budget )
         cwd = os.getcwd()
         path = cwd + "/" + folder + "/" + subfolder
 
