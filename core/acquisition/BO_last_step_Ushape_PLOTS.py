@@ -655,6 +655,7 @@ class Last_Step():
                 U_train = self.Alg_utility(Y_train, w=w_estimated)
                 U_train = np.log([U_train.reshape((len(U_train),1))])
 
+
                 self.model_U = multi_outputGP(output_dim=1, noise_var=[1e-6] , exact_feval=[True] )
                 print("model_U,", self.model_U.kernel)
                 self._update_model(X_train, U_train, model=self.model_U)
