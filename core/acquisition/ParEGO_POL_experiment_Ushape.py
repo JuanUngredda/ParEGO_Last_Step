@@ -36,7 +36,7 @@ def POL_function_caller_test(rep):
     input_d = 2
     m = 2
     Overall_Budget = 40
-    for LS_budget in [0, 1, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39]:
+    for LS_budget in [0, 1, 3, 9,  15,  21,  27,  33,  39]:
         np.random.seed(rep)
         Last_Step_Budget = LS_budget
         Main_Alg_Budget = Overall_Budget - Last_Step_Budget
