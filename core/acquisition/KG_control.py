@@ -3,29 +3,9 @@ import sys
 import subprocess as sp
 import os
 import argparse
-# from mistery_experiment import function_caller_mistery
-# from KG_DEB_experiment import DEB_function_caller_test
-# from KG_SRN_experiment import SRN_function_caller_test
-#from KG_BNH_experiment import BNH_function_caller_test
-# from KG_TNK_BNH_experiment import TNK_BNH_function_caller_test
 
-from ParEGO_HOLE_experiment_Ushape import HOLE_function_caller_test
-from ParEGO_POL_experiment_Ushape import POL_function_caller_test
-from ParEGO_NO_HOLE_experiment_Ushape import NO_HOLE_function_caller_test
-#from HVI_TNK_BNH_experiment import TNK_BNH_function_caller_test
-#from HVI_BNH_experiment import BNH_function_caller_test
-# from test_func_2_experiment import function_caller_test_func_2
+from experiment_NO_HOLE_BayesInference import NO_HOLE_function_caller_test
 
-# from new_branin_TS import function_caller_new_brannin_TS
-# from test_func_2_TS import function_caller_test_func_2_TS
-# from mistery_experiment_TS import function_caller_mistery_TS
-# from RMITD_TS import function_caller_RMITD_TS
-# from RMITD_EI import function_caller_RMITD_EI
-# from RMITD_experiment import function_caller_RMITD
-#
-# from NN_TS import function_caller_NN_TS
-# from NN_EI import function_caller_NN_EI
-# from NN_experiment import function_caller_NN
 
 
 # This is a bare script that receives args, prints something, wastes some time,function_caller_test_func_2_TS
@@ -68,7 +48,7 @@ def run(args):
     # IMPORT AND RUN MODULES
     #functions = [function_caller_new_brannin_TS, function_caller_test_func_2_TS, function_caller_mistery_TS, function_caller_RMITD_TS, function_caller_RMITD_EI, function_caller_RMITD]
     #functions = [function_caller_RMITD ]
-    functions = [HOLE_function_caller_test, POL_function_caller_test]
+    functions = [NO_HOLE_function_caller_test]
     for func in functions:
         func(args.k)
 

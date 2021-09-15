@@ -18,7 +18,8 @@ from parameter_distribution import ParameterDistribution
 from utility import Utility
 from scipy.stats import dirichlet
 
-from BO_last_step import Last_Step
+# from BO_last_step_step_utility import Last_Step_step_util as Last_Step
+from DecisionMakerLastStepsInteraction import Last_Step_step_util as Last_Step
 from time import time as time
 #ALWAYS check cost in
 # --- Function to optimize
@@ -74,7 +75,6 @@ def HOLE_function_caller_test(rep):
     # --- Utility function
     def prior_sample_generator(n_samples=1, seed=None):
         if seed is None:
-
             samples = np.random.dirichlet(np.ones((m,)), n_samples)
             print("samples", samples)
 
@@ -129,7 +129,8 @@ def HOLE_function_caller_test(rep):
 
 
     # print("Finished Initialization")
-    X, Y, C, Opportunity_cost = bo.run_optimization(max_iter =100,  rep=rep, last_step_evaluator=last_step_acquisition, path=path, verbosity=False)
+    X, Y, C, Opportunity_cost = bo.run_optimization(max_iter =100,  rep=rep,
+                                                    last_step_evaluator=last_step_acquisition, path=path, verbosity=False)
     print("Code Ended")
 
     # data = {}
@@ -150,7 +151,7 @@ def HOLE_function_caller_test(rep):
 
 # for rep in range(10):
 #  function_caller_test_function_2_penalty(rep)
-# HOLE_function_caller_test(rep=16)
+HOLE_function_caller_test(rep=1)
 print("ready")
 
 
