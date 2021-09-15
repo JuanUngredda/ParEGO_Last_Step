@@ -7,29 +7,27 @@ from ParEGO_acquisition import ParEGO
 from bayesian_optimisation import BO
 import os
 from DecisionMakerLastStepsInteraction import AcquisitionFunctionandDecisionMakerInteraction
-from EI_UU_acquisition import ExpectedImprovementUtilityUncertainty
+from weightedEI_UU_acquisition import WeightedExpectedImprovementUtilityUncertainty
 from utility_core import *
 #ALWAYS check cost in
 # --- Function to optimize
 
 
-def NO_HOLE_function_caller_test(rep):
+def weighted_NO_HOLE_function_caller_test(rep):
 
     noise = 1e-6
     np.random.seed(rep)
 
 
-    max_number_DMqueries = [0,1,10]
-    first_query_iteration = [[0],
-                             [0, 1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 99],
-                             [0, 1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 94]]
+    max_number_DMqueries = [1]
+    first_query_iteration = [[0, 1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 99]]
 
     for num_queries_idx in range(len(max_number_DMqueries)):
 
         for first_query_iteration_element in first_query_iteration[num_queries_idx]:
 
             folder = "RESULTS"
-            subfolder = "NO_HOLE_Bayes_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
+            subfolder = "NO_HOLE_weighted_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
             cwd = os.getcwd()
             path = cwd + "/" + folder + "/"+subfolder
 
@@ -82,7 +80,7 @@ def NO_HOLE_function_caller_test(rep):
             # true_u_funcs = [Lin_u]
 
             # --- Utility function
-            EI_UU = ExpectedImprovementUtilityUncertainty(model=model_f,
+            EI_UU = WeightedExpectedImprovementUtilityUncertainty(model=model_f,
                                                           space=space,
                                                           optimizer = acq_opt,
                                                           Inference_Object=BayesInferenceUtility)
@@ -122,8 +120,8 @@ def NO_HOLE_function_caller_test(rep):
                                                             rep=rep,
                                                             path=path,
                                                             verbosity=False,
-                                                             max_number_DMqueries=5,#max_number_DMqueries[num_queries_idx],
-                                                             first_query_iteration=1#first_query_iteration_element
+                                                             max_number_DMqueries=max_number_DMqueries[num_queries_idx],
+                                                             first_query_iteration=first_query_iteration_element
                                                              )
 
         print("Code Ended")
@@ -133,7 +131,7 @@ def NO_HOLE_function_caller_test(rep):
 # for rep in range(10):
 #  function_caller_test_function_2_penalty(rep)
 # for rep in range(10):
-# NO_HOLE_function_caller_test(1)
+# NO_HOLE_function_caller_test(2)
 # print("ready")
 
 

@@ -53,6 +53,8 @@ class AcquisitionFunctionandDecisionMakerInteraction():
     def include_posterior_samples_in_acq(self, posterior_samples):
         self.acquisition_f.include_fantasised_posterior_samples(posterior_samples)
 
+    def get_data(self):
+        return self.InteractionClass.get_
 
     def _update_model(self, X, Y, model=None):
         """
@@ -62,6 +64,7 @@ class AcquisitionFunctionandDecisionMakerInteraction():
         ### --- input that goes into the model (is unziped in case there are categorical variables)
         X_inmodel = self.space.unzip_inputs(X)
         model.updateModel(X_inmodel, Y)
+
 
     def get_DecisionMaker_data(self):
         return self.InteractionClass.ShowParetoFronttotheDecisionMaker()

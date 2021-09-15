@@ -50,6 +50,9 @@ class Inference_method():
         self.Pareto_front = Pareto_front
         self.preferred_points = preferred_points
 
+    def get_Decision_Maker_Data(self):
+        return self.Pareto_front, self.preferred_points
+
     def get_utility_function(self):
         return self.u_function
 

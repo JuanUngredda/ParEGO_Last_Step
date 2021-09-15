@@ -85,7 +85,7 @@ class ParetoFrontGeneration():
 
             mu_x = model.posterior_mean(X)
             mu_x = np.vstack(mu_x).T
-            return -mu_x
+            return mu_x
         return prediction
 
     def ShowParetoFronttotheDecisionMaker(self):
