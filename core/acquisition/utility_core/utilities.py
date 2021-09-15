@@ -42,6 +42,7 @@ class Tchevichev_utility_func:
             y = np.atleast_2d(y)[np.newaxis, :, :]
         scaled_vectors = parameter * y
         utility = np.min(scaled_vectors, axis=-1)
+
         return utility
 
 
@@ -58,8 +59,11 @@ class composed_utility_functions:
         if vectorised:
             out = 0
             for ufun in range(len(self.u_funcs)):
-                objective_weights = weights[:,ufun][:,np.newaxis, np.newaxis,np.newaxis,]
-                out += self.u_funcs[ufun](y, parameters[ufun][:,np.newaxis,np.newaxis,:])*objective_weights
+                objective_weights = weights[:,ufun][:,np.newaxis, np.newaxis]
+                individual_utility = self.u_funcs[ufun](y, parameters[ufun][:,np.newaxis,np.newaxis,:],
+                                                        vectorized=vectorised)
+
+                out += individual_utility *objective_weights
             return out
         else:
 

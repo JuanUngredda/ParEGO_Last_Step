@@ -40,7 +40,7 @@ class ExpectedImprovementUtilityUncertainty(AcquisitionBase):
         self.W_samples = norm(loc=0, scale=1).ppf(lhd)  # Pseudo-random number generation to compute expectation
         self.old_number_of_simulation_samples = 0
         self.number_of_gp_hyps_samples = 1
-        self.n_samples = 200
+        self.n_samples = 50
         self.fantasised_posterior_samples = None
 
         super(ExpectedImprovementUtilityUncertainty, self).__init__(model, space, optimizer, cost_withGradients=cost_withGradients)
@@ -54,9 +54,9 @@ class ExpectedImprovementUtilityUncertainty(AcquisitionBase):
         self.fantasised_posterior_samples = posterior_samples
 
     def get_posterior_samples(self):
-        posterior_samples = self.Inference_Object.get_generated_posterior_samples()
-        if posterior_samples is None:
-            posterior_samples = self.Inference_Object.posterior_sampler(self.n_samples)
+        # posterior_samples = self.Inference_Object.get_generated_posterior_samples()
+        # if posterior_samples is None:
+        posterior_samples = self.Inference_Object.posterior_sampler(self.n_samples)
         return posterior_samples
 
     def _compute_acq(self, X, parallel=True):
@@ -89,8 +89,8 @@ class ExpectedImprovementUtilityUncertainty(AcquisitionBase):
         utility_parameters = utility_parameter_samples[0]
         linear_weight_combination = utility_parameter_samples[1]
         utility = self.Inference_Object.get_utility_function()
-        # utility_parameter_samples = utility_parameter_samples[:, np.newaxis, np.newaxis, :]
 
+        # print("linweight",linear_weight_combination.shape)
         # ALL dimensions adapated to be (Ntheta, Nz, Nx, Dimy)
         for h in range(self.number_of_gp_hyps_samples):
             # self.model.set_hyperparameters(h)
@@ -109,22 +109,26 @@ class ExpectedImprovementUtilityUncertainty(AcquisitionBase):
                                           vectorised=True)
 
             max_valX_evaluated = np.max(Best_Sampled_Utility, axis=-1)
-            max_valX_evaluated = max_valX_evaluated[:, :, :, np.newaxis]
-
+            max_valX_evaluated = max_valX_evaluated[:, :, np.newaxis]
+            # print("max_valX_evaluated",max_valX_evaluated.shape)
             MU = MU[np.newaxis, np.newaxis, :, :]
             sigmaX = sigmaX[np.newaxis, np.newaxis, :, :]
             Y = MU + sigmaX * Z
 
-            Utility = utility(y = Y, #transform into min
+            # print("Y", Y.shape)
+            Utility = utility(y = Y,
                               weights=linear_weight_combination,
                               parameters=utility_parameters ,
                               vectorised=True)
 
+            # print(max_valX_evaluated.shape)
+            # print(Utility.shape)
+            # raise
             Improvement = Utility - max_valX_evaluated
             Improvement[Improvement < 0] = 0.0
 
             # print("Improvement", np.mean(Improvement, axis=(0, 1)))
-            marginal_acqX[:, h] += np.mean(Improvement, axis=(0, 1, 2))
+            marginal_acqX[:, h] += np.mean(Improvement, axis=(0, 1))
 
         # marginal_acqX = np.sum(marginal_acqX, axis=1)
         marginal_acqX /= self.number_of_gp_hyps_samples

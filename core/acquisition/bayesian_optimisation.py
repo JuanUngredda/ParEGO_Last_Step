@@ -171,6 +171,18 @@ class BO(object):
             print("maKG optimizer")
             start = time.time()
 
+            # true_best_x, true_best_val = self.compute_underlying_best()
+            #
+            # design_plot = initial_design('random', self.space, 10000)
+            #
+            # func_val, _ = self.objective.evaluate(design_plot)
+            # func_val_recommended ,_= self.objective.evaluate(true_best_x)
+            # print(func_val_recommended)
+            # plt.scatter(func_val[0], func_val[1])
+            # plt.scatter(func_val_recommended [0], func_val_recommended [1])
+            # plt.show()
+            # print(true_best_val)
+            # raise
             if (self.DecisionMakerInteractor is not None) \
                     and (self.num_acquisitions in query_schedule):
 
@@ -303,16 +315,21 @@ class BO(object):
         Yvals = self.model.get_Y_values()
         Yvals = np.stack(Yvals, axis=1)
 
+        true_best_x, true_best_val = self.compute_underlying_best()
+        true_best_y, _ = self.objective.evaluate(true_best_x)
+
+
         axs[0, 1].set_title("GP(X)")
-        axs[0, 1].scatter(mu_f[:,0], mu_f[:,1], c= np.array(HVI).reshape(-1))
+        axs[0, 1].scatter(mu_f[:,0], mu_f[:,1], c= np.array(HVI*100).reshape(-1))
         axs[0,1].scatter(mu_predicted_best[:,0],mu_predicted_best[:,1] , color="magenta")
         axs[0, 1].scatter(Yvals[:, 0], Yvals[:, 1], color="orange")
+        axs[0, 1].scatter(true_best_y[ 0], true_best_y[1], color="red")
         axs[0, 1].legend()
 
+        posterior_samples = self.acquisition.get_posterior_samples()
         print("self.suggested_sample",self.suggested_sample)
-        axs[1, 0].set_title("Var[GP(X)]")
-        axs[1, 0].scatter(design_plot[:,0], design_plot[:,1], c= np.array(HVI).reshape(-1))
-        axs[1,0].scatter(self.suggested_sample[:,0],self.suggested_sample[:,1] , color="magenta")
+        axs[1, 0].set_title("posterior samples")
+        axs[1, 0].hist(posterior_samples[0][0][:,0])
         axs[1, 0].legend()
 
         axs[1, 1].set_title("acq(X)")
@@ -357,15 +374,19 @@ class BO(object):
         true_recommended_utility = true_underlying_utility(y = Y_recommended,
                                        weights=true_parameters[1],
                                        parameters=true_parameters[0])
+
         out = true_recommended_utility.reshape(-1)
 
         self.data["Utility"] = np.concatenate((self.data["Utility"], np.array(out).reshape(-1)))
 
         Y_train = self.model.get_Y_values()
         Y_train = np.concatenate(Y_train, axis=1)
+
+
         uval_sampled = np.max(true_underlying_utility(y=Y_train,
                                                        weights=true_parameters[1],
                                                        parameters=true_parameters[0]))
+
 
         N_entries = len(self.data["Utility"].reshape(-1))
         self.data["Utility_sampled"] = np.concatenate((self.data["Utility_sampled"], np.array(uval_sampled).reshape(-1)))
@@ -407,16 +428,16 @@ class BO(object):
         def top_true_utility(X):
             X = np.atleast_2d(X)
             Y_recommended, cost_new = self.objective.evaluate(X)
-            Y_recommended = -np.concatenate(Y_recommended, axis=1)
+            Y_recommended = np.concatenate(Y_recommended, axis=1)
             uval = true_underlying_utility(y = Y_recommended,
                                            weights= weight[1],
                                            parameters= weight[0])
 
-            return np.array(uval).reshape(-1)
+            return -np.array(uval).reshape(-1)
 
         true_best_x, true_best_val = optimiser(f=top_true_utility)
 
-        return true_best_x, true_best_val
+        return true_best_x, -true_best_val
 
 
     def evaluate_objective(self):
