@@ -184,8 +184,7 @@ class BO(object):
                 # Inference on pareto front and getting posterior samples
                 posterior_samples = self.DecisionMakerInteractor.posterior_sample_generation(picked_solution_indeces,
                                                                                                 Pareto_fronts)
-                plt.hist(posterior_samples[0][0][:,0])
-                plt.show()
+
                 #Include new posterior samples in the acquisition function
                 self.DecisionMakerInteractor.include_posterior_samples_in_acq(posterior_samples=posterior_samples)
                 self.number_of_queries_taken+=1
