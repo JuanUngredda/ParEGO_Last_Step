@@ -122,8 +122,8 @@ def NO_HOLE_function_caller_test(rep):
                                                             rep=rep,
                                                             path=path,
                                                             verbosity=False,
-                                                             max_number_DMqueries=5,#max_number_DMqueries[num_queries_idx],
-                                                             first_query_iteration=1#first_query_iteration_element
+                                                             max_number_DMqueries=max_number_DMqueries[num_queries_idx],
+                                                             first_query_iteration=first_query_iteration_element
                                                              )
 
         print("Code Ended")
