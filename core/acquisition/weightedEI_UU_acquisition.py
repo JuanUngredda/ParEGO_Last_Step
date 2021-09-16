@@ -66,7 +66,7 @@ class WeightedExpectedImprovementUtilityUncertainty(AcquisitionBase):
         Pareto_front, preferred_points = self.Inference_Object.get_Decision_Maker_Data()
 
         if Pareto_front is None:
-            return np.ones(X.shape)
+            return np.ones(X.shape[0])
         else:
             Last_PF = -Pareto_front[-1]
             Last_preferred_point_idx = preferred_points[-1]
@@ -76,8 +76,6 @@ class WeightedExpectedImprovementUtilityUncertainty(AcquisitionBase):
             meanX = self.model.predict(X)[0]
             meanX = -np.stack(meanX, axis=1)
             w = []
-
-
             for i in range(len(meanX)):
                 if pareto_dominance(preferred_point, meanX[i]):
                     w.append(0)
@@ -107,6 +105,7 @@ class WeightedExpectedImprovementUtilityUncertainty(AcquisitionBase):
         acqX = marginal_acqX  # acqX = np.sum(marginal_acqX, axis=1) / len(self.utility_parameter_samples)
 
         #acqX = np.reshape(acqX, (X.shape[0], 1))
+
         return acqX.reshape(-1) * self.weighting_surface(X).reshape(-1)
 
     def _marginal_acq(self, X, utility_parameter_samples):
