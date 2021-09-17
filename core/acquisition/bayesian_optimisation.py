@@ -308,6 +308,7 @@ class BO(object):
         mu_predicted_best = np.stack( mu_predicted_best, axis=1)
 
         HVI = self.acquisition._compute_acq(design_plot)
+        # weighted_surface = self.acquisition.weighting_surface(design_plot)
         fig, axs = plt.subplots(2, 2)
         axs[0, 0].set_title('True PF Function')
         axs[0, 0].scatter(func_val[:, 0], func_val[:, 1])
@@ -318,10 +319,17 @@ class BO(object):
         true_best_x, true_best_val = self.compute_underlying_best()
         true_best_y, _ = self.objective.evaluate(true_best_x)
 
+        # Pareto_front, preferred_points = self.acquisition.get_sampled_data()
+        # Last_PF = Pareto_front[-1]
+        # Last_preferred_point_idx = preferred_points[-1]
+        #
+        # preferred_point = Last_PF[Last_preferred_point_idx]
 
         axs[0, 1].set_title("GP(X)")
         axs[0, 1].scatter(mu_f[:,0], mu_f[:,1], c= np.array(HVI*100).reshape(-1))
+        # axs[0, 1].scatter(mu_f[:, 0], mu_f[:, 1], c=weighted_surface.reshape(-1))
         axs[0,1].scatter(mu_predicted_best[:,0],mu_predicted_best[:,1] , color="magenta")
+        # axs[0,1].scatter(preferred_point[0], preferred_point[1], color="red")
         axs[0, 1].scatter(Yvals[:, 0], Yvals[:, 1], color="orange")
         axs[0, 1].scatter(true_best_y[ 0], true_best_y[1], color="red")
         axs[0, 1].legend()

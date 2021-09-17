@@ -7,27 +7,27 @@ from ParEGO_acquisition import ParEGO
 from bayesian_optimisation import BO
 import os
 from DecisionMakerLastStepsInteraction import AcquisitionFunctionandDecisionMakerInteraction
-from weightedEI_UU_acquisition import WeightedExpectedImprovementUtilityUncertainty
+from point_estimation_EI_UU_acquisition import ExpectedImprovementUtilityUncertaintywithPointUtility
 from utility_core import *
 #ALWAYS check cost in
 # --- Function to optimize
 
 
-def weighted_NO_HOLE_function_caller_test(rep):
+def point_estimation_NO_HOLE_function_caller_test(rep):
 
     noise = 1e-6
     np.random.seed(rep)
 
 
     max_number_DMqueries = [1]
-    first_query_iteration = [[0,1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 99]]
+    first_query_iteration = [[0, 1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 99]]
 
     for num_queries_idx in range(len(max_number_DMqueries)):
 
         for first_query_iteration_element in first_query_iteration[num_queries_idx]:
 
             folder = "RESULTS"
-            subfolder = "NO_HOLE_weighted_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
+            subfolder = "NO_HOLE_point_estimation_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
             cwd = os.getcwd()
             path = cwd + "/" + folder + "/"+subfolder
 
@@ -80,7 +80,7 @@ def weighted_NO_HOLE_function_caller_test(rep):
             # true_u_funcs = [Lin_u]
 
             # --- Utility function
-            EI_UU = WeightedExpectedImprovementUtilityUncertainty(model=model_f,
+            EI_UU = ExpectedImprovementUtilityUncertaintywithPointUtility(model=model_f,
                                                           space=space,
                                                           optimizer = acq_opt,
                                                           Inference_Object=BayesInferenceUtility)
@@ -131,7 +131,7 @@ def weighted_NO_HOLE_function_caller_test(rep):
 # for rep in range(10):
 #  function_caller_test_function_2_penalty(rep)
 # for rep in range(10):
-# weighted_NO_HOLE_function_caller_test(1)
+# point_estimation_NO_HOLE_function_caller_test(1)
 # print("ready")
 
 

@@ -3,19 +3,10 @@
 import numpy as np
 from GPyOpt.acquisitions.base import AcquisitionBase
 from GPyOpt.core.task.cost import constant_cost_withGradients
-from GPyOpt.experiment_design import initial_design
-from aux_modules.gradient_modules import gradients
 from scipy.stats import norm
-import scipy
-import time
-import matplotlib.pyplot as plt
-from pygmo import hypervolume
-from numba import jit
-from pathos.multiprocessing import ProcessingPool as Pool
 from pyDOE import *
-from pygmo import *
 
-class WeightedExpectedImprovementUtilityUncertainty(AcquisitionBase):
+class ExpectedImprovementUtilityUncertaintywithPointUtility(AcquisitionBase):
     """
     Multi-attribute knowledge gradient acquisition function
 
@@ -36,6 +27,7 @@ class WeightedExpectedImprovementUtilityUncertainty(AcquisitionBase):
         lhd = lhs(self.output_dim, samples=50)
 
         #initialise variables
+        self.point_estimation_sample = None
         self.current_max_value = np.inf
         self.Z_samples_obj = None
         self.W_samples = norm(loc=0, scale=1).ppf(lhd)  # Pseudo-random number generation to compute expectation
@@ -44,7 +36,7 @@ class WeightedExpectedImprovementUtilityUncertainty(AcquisitionBase):
         self.n_samples = 50
         self.fantasised_posterior_samples = None
 
-        super(WeightedExpectedImprovementUtilityUncertainty, self).__init__(model, space, optimizer, cost_withGradients=cost_withGradients)
+        super(ExpectedImprovementUtilityUncertaintywithPointUtility, self).__init__(model, space, optimizer, cost_withGradients=cost_withGradients)
         if cost_withGradients == None:
             self.cost_withGradients = constant_cost_withGradients
         else:
@@ -56,46 +48,19 @@ class WeightedExpectedImprovementUtilityUncertainty(AcquisitionBase):
 
     def get_posterior_samples(self):
         # posterior_samples = self.Inference_Object.get_generated_posterior_samples()
-        # if posterior_samples is None:
-        posterior_samples = self.Inference_Object.prior_sampler(self.n_samples)
-        return posterior_samples
-
-    def get_sampled_data(self):
-        Pareto_front, preferred_points = self.Inference_Object.get_Decision_Maker_Data()
-        return Pareto_front, preferred_points
-
-    def weighting_surface(self, X):
 
         Pareto_front, preferred_points = self.Inference_Object.get_Decision_Maker_Data()
 
         if Pareto_front is None:
-            return np.ones(X.shape[0])
+            posterior_samples = self.Inference_Object.prior_sampler(self.n_samples)
+
         else:
-            Last_PF = -Pareto_front[-1]
-            Last_preferred_point_idx = preferred_points[-1]
-
-            preferred_point = Last_PF[Last_preferred_point_idx]
-
-            meanX = self.model.predict(X)[0]
-            meanX = -np.stack(meanX, axis=1)
-            w = []
-            for i in range(len(meanX)):
-
-                if pareto_dominance(preferred_point, meanX[i]):
-                    w.append(0)
-                elif pareto_dominance(meanX[i], preferred_point):
-                    w.append(1)
-                else:
-
-                    Extended_Pareto_Front = np.concatenate((np.atleast_2d(meanX[i]), Last_PF))
-
-                    ndf, dl, dc, ndr = fast_non_dominated_sorting(
-                        points=list(Extended_Pareto_Front))
-                    if 0 in ndf[0]:
-                        w.append(1/3)
-                    else:
-                        w.append(0)
-            return np.array(w).reshape(-1)
+            if self.point_estimation_sample is None:
+                self.point_estimation_sample = self.Inference_Object.posterior_sampler(1)
+                posterior_samples = self.point_estimation_sample
+            else:
+                posterior_samples =  self.point_estimation_sample
+        return posterior_samples
 
     def _compute_acq(self, X, parallel=True):
         """
@@ -110,14 +75,13 @@ class WeightedExpectedImprovementUtilityUncertainty(AcquisitionBase):
             lhd = lhs(self.model.output_dim, samples=50)
             self.W_samples = norm(loc=0, scale=1).ppf(lhd)  # Pseudo-random number generation to compute expectation
             self.old_number_of_simulation_samples = current_number_simulation_points
-            self.prior_samples = self.get_posterior_samples()
+            self.posterior_samples = self.get_posterior_samples()
 
-        marginal_acqX = self._marginal_acq(X, self.prior_samples)
+        marginal_acqX = self._marginal_acq(X, self.posterior_samples)
         acqX = marginal_acqX  # acqX = np.sum(marginal_acqX, axis=1) / len(self.utility_parameter_samples)
 
         #acqX = np.reshape(acqX, (X.shape[0], 1))
-
-        return acqX.reshape(-1) * self.weighting_surface(X).reshape(-1)
+        return acqX.reshape(-1)
 
     def _marginal_acq(self, X, utility_parameter_samples):
         """
