@@ -20,7 +20,7 @@ def Bayes_HVI_NO_HOLE_function_caller_test(rep):
 
 
     max_number_DMqueries = [1 ,10]
-    first_query_iteration = [[0, 1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 99],
+    first_query_iteration = [[ 1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 99],
                              [0, 1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 94]]
 
     for num_queries_idx in range(len(max_number_DMqueries)):

@@ -36,6 +36,7 @@ class HVI(AcquisitionBase):
         self.n_samples=50
         self.old_number_of_simulation_samples = 0
         self.old_number_of_dm_samples = 0
+        self.posterior_samples = self.get_posterior_samples()
         super(HVI, self).__init__(model, space, optimizer,alpha=alpha, cost_withGradients=cost_withGradients)
         if cost_withGradients == None:
             self.cost_withGradients = constant_cost_withGradients
@@ -77,7 +78,10 @@ class HVI(AcquisitionBase):
         current_number_simulation_points = self.model.get_X_values().shape[0]
 
         Pareto_front, preferred_points = self.Inference_Object.get_Decision_Maker_Data()
-        current_number_dm_points = len(preferred_points)
+        if preferred_points is None:
+            current_number_dm_points = 0
+        else:
+            current_number_dm_points = len(preferred_points)
         if not self.old_number_of_simulation_samples == current_number_simulation_points:
             self.old_number_of_simulation_samples = current_number_simulation_points
 
