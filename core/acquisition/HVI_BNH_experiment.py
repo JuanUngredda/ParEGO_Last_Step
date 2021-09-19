@@ -7,7 +7,7 @@ from multi_outputGP import multi_outputGP
 import matplotlib.pyplot as plt
 import scipy
 from continuous_KG import KG
-from HVI_acquisition import HVI
+from constrained_HVI_acquisition import HVI
 #from Constrained_U_KG import AcquisitionUKG
 # from U_KG import AcquisitionUKG
 from bayesian_optimisation import BO

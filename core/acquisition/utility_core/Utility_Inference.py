@@ -207,13 +207,15 @@ class Inference_method():
 
         return Lik_val
 
-    def predictive_distribution(self, current_front,
-                                preferred_point):
+    def Expected_Utility(self, preferred_point, posterior_samples=None):
 
-        posterior_theta, posterior_weights = self.posterior_sampler(n_samples=100,
-                                                                    seed=None)
+        if posterior_samples is None:
+            posterior_theta, posterior_weights = self.posterior_sampler(n_samples=50,
+                                                                        seed=None)
+        else:
+            posterior_theta, posterior_weights = posterior_samples
 
-
+        preferred_point = np.atleast_2d(preferred_point)
         predictive_lik = np.zeros((preferred_point.shape[0],))
         for l in range(len(preferred_point)):
             u_best = self.u_function(y=preferred_point[l],

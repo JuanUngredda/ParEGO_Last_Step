@@ -326,7 +326,7 @@ class BO(object):
         # preferred_point = Last_PF[Last_preferred_point_idx]
 
         axs[0, 1].set_title("GP(X)")
-        axs[0, 1].scatter(mu_f[:,0], mu_f[:,1], c= np.array(HVI*100).reshape(-1))
+        axs[0, 1].scatter(mu_f[:,0], mu_f[:,1], c= np.array(HVI).reshape(-1))
         # axs[0, 1].scatter(mu_f[:, 0], mu_f[:, 1], c=weighted_surface.reshape(-1))
         axs[0,1].scatter(mu_predicted_best[:,0],mu_predicted_best[:,1] , color="magenta")
         # axs[0,1].scatter(preferred_point[0], preferred_point[1], color="red")
@@ -339,6 +339,8 @@ class BO(object):
         axs[1, 0].set_title("posterior samples")
         axs[1, 0].hist(posterior_samples[0][0][:,0])
         axs[1, 0].legend()
+
+
 
         axs[1, 1].set_title("acq(X)")
         axs[1, 1].scatter(design_plot[:,0], design_plot[:,1], c= np.array(HVI).reshape(-1))
@@ -482,7 +484,7 @@ class BO(object):
         """
         ## --- Update the context if any
 
-        self.acquisition.optimizer.context_manager = ContextManager(self.space, self.context, )
+        self.acquisition.optimizer.context_manager = ContextManager(self.space, self.context)
         print("compute next evaluation")
         if self.sample_from_acq:
             print("suggest next location given THOMPSON SAMPLING")
