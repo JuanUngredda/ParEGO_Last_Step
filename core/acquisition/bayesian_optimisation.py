@@ -307,11 +307,21 @@ class BO(object):
         mu_predicted_best =self.model.posterior_mean(self.suggested_sample)
         mu_predicted_best = np.stack( mu_predicted_best, axis=1)
 
-        HVI = self.acquisition._compute_acq(design_plot)
+        best_HVI = self.acquisition._compute_acq(self.suggested_sample, verbose=True)
+        # raise
+
+        # HVI = self.acquisition._compute_acq(design_plot)
+
         # weighted_surface = self.acquisition.weighting_surface(design_plot)
+        true_underlying_utility = self.get_true_utility_function()
+        true_parameters = self.get_true_parameters()
+
+        true_utility_values = true_underlying_utility(y = func_val,
+                                                   weights=true_parameters[1],
+                                                   parameters=true_parameters[0])
         fig, axs = plt.subplots(2, 2)
         axs[0, 0].set_title('True PF Function')
-        axs[0, 0].scatter(func_val[:, 0], func_val[:, 1])
+        axs[0, 0].scatter(func_val[:, 0], func_val[:, 1], c=np.array(true_utility_values).reshape(-1) )
 
         Yvals = self.model.get_Y_values()
         Yvals = np.stack(Yvals, axis=1)
@@ -326,7 +336,8 @@ class BO(object):
         # preferred_point = Last_PF[Last_preferred_point_idx]
 
         axs[0, 1].set_title("GP(X)")
-        axs[0, 1].scatter(mu_f[:,0], mu_f[:,1], c= np.array(HVI).reshape(-1))
+        axs[0, 1].scatter(func_val[:, 0], func_val[:, 1], c=np.array(true_utility_values).reshape(-1))
+        # axs[0, 1].scatter(mu_f[:,0], mu_f[:,1], c= np.array(HVI).reshape(-1))
         # axs[0, 1].scatter(mu_f[:, 0], mu_f[:, 1], c=weighted_surface.reshape(-1))
         axs[0,1].scatter(mu_predicted_best[:,0],mu_predicted_best[:,1] , color="magenta")
         # axs[0,1].scatter(preferred_point[0], preferred_point[1], color="red")
@@ -336,16 +347,17 @@ class BO(object):
 
         posterior_samples = self.acquisition.get_posterior_samples()
         print("self.suggested_sample",self.suggested_sample)
-        axs[1, 0].set_title("posterior samples")
+        axs[1, 0].set_title("posterior samples $\Theta_{1}$")
         axs[1, 0].hist(posterior_samples[0][0][:,0])
-        axs[1, 0].legend()
+        axs[1, 0].set_xlim([0, 1])
 
-
-
-        axs[1, 1].set_title("acq(X)")
-        axs[1, 1].scatter(design_plot[:,0], design_plot[:,1], c= np.array(HVI).reshape(-1))
-        axs[1,1].scatter(self.suggested_sample[:,0],self.suggested_sample[:,1] , color="magenta")
-        axs[1, 1].legend()
+        axs[1, 1].set_title("posterior samples $\Theta_{2}$")
+        axs[1, 1].hist(posterior_samples[0][0][:,1])
+        axs[1, 1].set_xlim([0, 1])
+        # axs[1, 1].set_title("acq(X)")
+        # axs[1, 1].scatter(design_plot[:,0], design_plot[:,1], c= np.array(HVI).reshape(-1))
+        # axs[1,1].scatter(self.suggested_sample[:,0],self.suggested_sample[:,1] , color="magenta")
+        # axs[1, 1].legend()
 
         # axs[1, 1].set_title("mu pf")
         # axs[1, 1].scatter(design_plot[:,0],design_plot[:,1],c= np.array(mu_f).reshape(-1) * np.array(pf).reshape(-1))
@@ -375,7 +387,7 @@ class BO(object):
 
     def store_results(self, recommended_x):
 
-        true_underlying_utility = self.get_true_utility()
+        true_underlying_utility = self.get_true_utility_function()
         true_parameters = self.get_true_parameters()
 
 
@@ -420,8 +432,8 @@ class BO(object):
             extra_gen_file.to_csv(path_or_buf=extra_path)
 
 
-    def get_true_utility(self):
-        return self.DecisionMakerInteractor.get_true_utility()
+    def get_true_utility_function(self):
+        return self.DecisionMakerInteractor.get_true_utility_function()
 
     def get_true_parameters(self):
         return self.DecisionMakerInteractor.get_true_parameters()
@@ -431,7 +443,7 @@ class BO(object):
 
     def compute_underlying_best(self):
 
-        true_underlying_utility = self.get_true_utility()
+        true_underlying_utility = self.get_true_utility_function()
         weight = self.get_true_parameters()
         optimiser =self.get_optimiser()
 

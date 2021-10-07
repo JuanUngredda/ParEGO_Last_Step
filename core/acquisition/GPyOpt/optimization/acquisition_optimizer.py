@@ -83,7 +83,7 @@ class AcquisitionOptimizer(object):
         if re_use == True:
             anchor_points = self.old_anchor_points
         else:
-            anchor_points = anchor_points_generator.get(num_anchor=5,X_sampled_values=self.model.get_X_values() ,duplicate_manager=duplicate_manager, context_manager=self.context_manager)
+            anchor_points = anchor_points_generator.get(num_anchor=1,X_sampled_values=self.model.get_X_values() ,duplicate_manager=duplicate_manager, context_manager=self.context_manager)
             self.old_anchor_points = anchor_points
 
         # self.model_True_GP = self.model

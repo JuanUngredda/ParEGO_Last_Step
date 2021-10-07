@@ -19,10 +19,14 @@ def NO_HOLE_function_caller_test(rep):
     np.random.seed(rep)
 
 
-    max_number_DMqueries = [0,1,10]
-    first_query_iteration = [[0],
-                             [0, 1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 99],
-                             [0, 1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 94]]
+    # max_number_DMqueries = [0,1,10]
+    # first_query_iteration = [[0],
+    #                          [0, 1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 99],
+    #                          [0, 1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 94]]
+
+    max_number_DMqueries = [1]
+    first_query_iteration = [
+                             [1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 99]]
 
     for num_queries_idx in range(len(max_number_DMqueries)):
 
@@ -87,15 +91,16 @@ def NO_HOLE_function_caller_test(rep):
                                                           optimizer = acq_opt,
                                                           Inference_Object=BayesInferenceUtility)
 
-
-
-            evaluator = GPyOpt.core.evaluators.Sequential(EI_UU)
-
             # --- Decision Maker interaction with the Front Class
             InteractionwithDecisionMakerClass = ParetoFrontGeneration(model=model_f,
                                                                       space=space,
                                                                       seed=rep,
                                                                       utility=u_funcs)
+
+
+            evaluator = GPyOpt.core.evaluators.Sequential(EI_UU)
+
+
 
             AcquisitionwithDMInteration = AcquisitionFunctionandDecisionMakerInteraction(model=model_f,
                                                                                          true_f=f,
@@ -121,7 +126,7 @@ def NO_HOLE_function_caller_test(rep):
             X, Y, Opportunity_cost = bo.run_optimization(max_iter =100,
                                                             rep=rep,
                                                             path=path,
-                                                            verbosity=False,
+                                                            verbosity=True,
                                                              max_number_DMqueries=max_number_DMqueries[num_queries_idx],
                                                              first_query_iteration=first_query_iteration_element
                                                              )
@@ -133,7 +138,7 @@ def NO_HOLE_function_caller_test(rep):
 # for rep in range(10):
 #  function_caller_test_function_2_penalty(rep)
 # for rep in range(10):
-# NO_HOLE_function_caller_test(1)
+NO_HOLE_function_caller_test(1)
 # print("ready")
 
 

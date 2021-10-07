@@ -23,13 +23,20 @@ class ParetoFrontGeneration():
         self.tindvdim = [u.n_params for u in utility]
         self.tdim = np.sum([u.n_params for u in utility])
         self.m_dim = self.tdim + self.wdim
-        self.weight = self.prior_sampler(n_samples=1, seed=seed)
+        self.weight = self.prior_sampler(n_samples=1, seed=seed)#([np.array([[0., 1]])], np.array([[1.]]))#
         print("weight", self.weight)
 
     def get_true_parameters(self):
         return self.weight
 
-    def get_true_utility(self):
+    def get_true_utility_values(self):
+        weight = self.get_true_parameters()
+        def utility(y):
+            return self.DM_utility(y, weights=self.weight[1],
+                                      parameters=self.weight[0])
+        return utility
+
+    def get_true_utility_function(self):
         return self.DM_utility
 
     def dirich_sampler(self, dim, n_samples=1, seed=None):

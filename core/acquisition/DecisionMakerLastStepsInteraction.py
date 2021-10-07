@@ -47,8 +47,8 @@ class AcquisitionFunctionandDecisionMakerInteraction():
     def get_algorithm_utility(self):
         return self.Inference_Object.get_utility_function()
 
-    def get_true_utility(self):
-        return self.InteractionClass.get_true_utility()
+    def get_true_utility_function(self):
+        return self.InteractionClass.get_true_utility_function()
 
     def include_posterior_samples_in_acq(self, posterior_samples):
         self.acquisition_f.include_fantasised_posterior_samples(posterior_samples)

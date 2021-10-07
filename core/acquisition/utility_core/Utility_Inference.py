@@ -2,7 +2,7 @@
 from scipy.stats import dirichlet
 import numpy as np
 from .utilities import composed_utility_functions
-
+import time
 class prior_sample_generator:
     def __init__(self, u_funcs):
         self.u_funcs = u_funcs
@@ -206,6 +206,41 @@ class Inference_method():
         Lik_val = np.product(log_lik, axis=0)
 
         return Lik_val
+
+    def Expected_likelihood(self, preferred_point,
+                            sampled_pareto_front,
+                            posterior_samples=None):
+
+        preferred_point = np.atleast_2d(preferred_point)
+        if posterior_samples is None:
+            utility_parameters, linear_weight_combination= self.posterior_sampler(n_samples=50,
+                                                                        seed=None)
+        else:
+            utility_parameters, linear_weight_combination = posterior_samples
+
+        utility_parameters = np.array(utility_parameters).squeeze()
+        utility_parameters = np.atleast_2d(utility_parameters)
+
+        N_parameter_samples = utility_parameters.shape[0]
+        lik = np.zeros((N_parameter_samples))
+
+
+        Pareto_front = np.concatenate((preferred_point,
+                                       sampled_pareto_front))
+
+        u_pf_samples = self.u_function(y=Pareto_front,
+                                       weights=linear_weight_combination,
+                                       parameters=utility_parameters)
+
+
+        simulated_best_index = np.argmax(u_pf_samples, axis=1)
+        # print(simulated_best_index)
+
+        lik[simulated_best_index==0] = 1
+
+        expected_likelihood = np.mean(lik)
+
+        return expected_likelihood
 
     def Expected_Utility(self, preferred_point, posterior_samples=None):
 

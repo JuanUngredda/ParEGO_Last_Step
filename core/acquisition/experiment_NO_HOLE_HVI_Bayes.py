@@ -7,7 +7,7 @@ from ParEGO_acquisition import ParEGO
 from bayesian_optimisation import BO
 import os
 from DecisionMakerLastStepsInteraction import AcquisitionFunctionandDecisionMakerInteraction
-from HVI_acquisition import HVI
+from weighted_HVI_acquisition import HVI
 from utility_core import *
 #ALWAYS check cost in
 # --- Function to optimize
@@ -19,9 +19,10 @@ def Bayes_HVI_NO_HOLE_function_caller_test(rep):
     np.random.seed(rep)
 
 
-    max_number_DMqueries = [1 ,10]
-    first_query_iteration = [[ 1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 99],
-                             [0, 1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 94]]
+    max_number_DMqueries = [0,1 ,10]
+    first_query_iteration = [[0],
+                             [ 1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 99],
+                             [0, 1 , 10, 20, 30, 40, 50, 60, 70, 80, 90]]
 
     for num_queries_idx in range(len(max_number_DMqueries)):
 
@@ -90,13 +91,19 @@ def Bayes_HVI_NO_HOLE_function_caller_test(rep):
 
 
 
-            evaluator = GPyOpt.core.evaluators.Sequential(HVI_acq)
-
             # --- Decision Maker interaction with the Front Class
             InteractionwithDecisionMakerClass = ParetoFrontGeneration(model=model_f,
                                                                       space=space,
                                                                       seed=rep,
                                                                       utility=u_funcs)
+
+            # true_dm_utility_function = InteractionwithDecisionMakerClass.get_true_utility_values()
+            # true_dm_utility_parameters = InteractionwithDecisionMakerClass.get_true_parameters()
+            #
+            # HVI_acq.include_true_dm_utility_vals(true_dm_utility_function)
+            # HVI_acq.include_true_dm_utility_parameters(true_dm_utility_parameters)
+
+            evaluator = GPyOpt.core.evaluators.Sequential(HVI_acq)
 
             AcquisitionwithDMInteration = AcquisitionFunctionandDecisionMakerInteraction(model=model_f,
                                                                                          true_f=f,
@@ -122,7 +129,7 @@ def Bayes_HVI_NO_HOLE_function_caller_test(rep):
             X, Y, Opportunity_cost = bo.run_optimization(max_iter =100,
                                                             rep=rep,
                                                             path=path,
-                                                            verbosity=False,
+                                                            verbosity=True,
                                                              max_number_DMqueries=max_number_DMqueries[num_queries_idx],
                                                              first_query_iteration=first_query_iteration_element
                                                              )
@@ -132,7 +139,7 @@ def Bayes_HVI_NO_HOLE_function_caller_test(rep):
         print("X",X,"Y",Y)
 
 # for rep in range(10):
-#  function_caller_test_function_2_penalty(rep)
+# Bayes_HVI_NO_HOLE_function_caller_test(7)
 # for rep in range(10):
 # Bayes_HVI_NO_HOLE_function_caller_test(2)
 # print("ready")

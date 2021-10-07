@@ -36,6 +36,7 @@ class HVI(AcquisitionBase):
         self.n_samples=50
         self.old_number_of_simulation_samples = 0
         self.old_number_of_dm_samples = 0
+        self.true_utility_values=None
         self.posterior_samples = self.get_posterior_samples()
         super(HVI, self).__init__(model, space, optimizer,alpha=alpha, cost_withGradients=cost_withGradients)
         if cost_withGradients == None:
@@ -56,9 +57,16 @@ class HVI(AcquisitionBase):
 
     def get_posterior_utility_landscape(self, y):
 
-        posterior_utility_samples = self.Inference_Object.Expected_Utility(y,
-                                                                           posterior_samples=self.posterior_samples)
+        if self.true_utility_values is None:
+            posterior_utility_samples = self.Inference_Object.Expected_Utility(y,
+                                                                               posterior_samples=self.posterior_samples)
+        else:
+            posterior_utility_samples = self.true_utility_values(y)
         return posterior_utility_samples
+
+    def include_true_dm_utility_vals(self, utility):
+        self.true_utility_values = utility
+
 
     def _compute_acq(self, X):
         """
@@ -112,7 +120,7 @@ class HVI(AcquisitionBase):
             mu = -self.model.posterior_mean(x)
             var = self.model.posterior_variance(x, noise=False)
 
-            y_lcb = mu #- self.alpha * np.sqrt(var)
+            y_lcb = mu - self.alpha * np.sqrt(var)
             y_lcb = np.transpose(y_lcb)
             P_new = (-np.concatenate(P,axis=1)).tolist()
             P_new = np.vstack([P_new, y_lcb])
@@ -133,7 +141,7 @@ class HVI(AcquisitionBase):
 
         Normalised_Expected_Utility = (Expected_utility_vals- self.min_util)/(self.max_util- self.min_util)
 
-        return  HVvals * Normalised_Expected_Utility
+        return  HVvals #* Normalised_Expected_Utility
 
     def ref_point_computation(self):
         ref_point_vector = []
