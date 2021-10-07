@@ -129,7 +129,7 @@ def Bayes_HVI_NO_HOLE_function_caller_test(rep):
             X, Y, Opportunity_cost = bo.run_optimization(max_iter =100,
                                                             rep=rep,
                                                             path=path,
-                                                            verbosity=True,
+                                                            verbosity = False,
                                                              max_number_DMqueries=max_number_DMqueries[num_queries_idx],
                                                              first_query_iteration=first_query_iteration_element
                                                              )
@@ -139,7 +139,7 @@ def Bayes_HVI_NO_HOLE_function_caller_test(rep):
         print("X",X,"Y",Y)
 
 # for rep in range(10):
-# Bayes_HVI_NO_HOLE_function_caller_test(7)
+# Bayes_HVI_NO_HOLE_function_caller_test(1)
 # for rep in range(10):
 # Bayes_HVI_NO_HOLE_function_caller_test(2)
 # print("ready")
