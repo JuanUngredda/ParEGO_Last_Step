@@ -19,7 +19,7 @@ def Bayes_HVI_NO_HOLE_function_caller_test(rep):
     np.random.seed(rep)
 
 
-    max_number_DMqueries = [0,1 ,10]
+    max_number_DMqueries = [0,10]
     first_query_iteration = [[0],
                              [ 1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 99],
                              [0, 1 , 10, 20, 30, 40, 50, 60, 70, 80, 90]]
