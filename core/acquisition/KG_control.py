@@ -8,6 +8,7 @@ import argparse
 # from experiment_NO_HOLE_weightedsurface import weighted_NO_HOLE_function_caller_test
 # from experiment_NO_HOLE_point_estimation import point_estimation_NO_HOLE_function_caller_test
 from experiment_NO_HOLE_HVI_Bayes import Bayes_HVI_NO_HOLE_function_caller_test
+from experiment_NO_HOLE_perfect_information import perfect_information_EI_UU_NO_HOLE_function_caller_test
 # This is a bare script that receives args, prints something, wastes some time,function_caller_test_func_2_TS
 # and saves something. Use this as a blank template to run experiments.
 # The sys.argv = [demo_infra_usage.py (time_stamped_folder) (integer)]
@@ -48,7 +49,7 @@ def run(args):
     # IMPORT AND RUN MODULES
     #functions = [function_caller_new_brannin_TS, function_caller_test_func_2_TS, function_caller_mistery_TS, function_caller_RMITD_TS, function_caller_RMITD_EI, function_caller_RMITD]
     #functions = [function_caller_RMITD ]
-    functions = [Bayes_HVI_NO_HOLE_function_caller_test]
+    functions = [perfect_information_EI_UU_NO_HOLE_function_caller_test]
     for func in functions:
         func(args.k)
 

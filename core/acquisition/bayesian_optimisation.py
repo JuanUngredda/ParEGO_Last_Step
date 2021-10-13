@@ -307,7 +307,7 @@ class BO(object):
         mu_predicted_best =self.model.posterior_mean(self.suggested_sample)
         mu_predicted_best = np.stack( mu_predicted_best, axis=1)
 
-        best_HVI = self.acquisition._compute_acq(self.suggested_sample, verbose=True)
+        # best_HVI = self.acquisition._compute_acq(self.suggested_sample)
         # raise
 
         # HVI = self.acquisition._compute_acq(design_plot)
