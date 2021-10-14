@@ -51,9 +51,9 @@ class Inference_method():
         self.preferred_points = preferred_points
 
 
-        plt.scatter(Pareto_front[0][:,0], Pareto_front[0][:,1])
-        plt.scatter(Pareto_front[0][preferred_points,0], Pareto_front[0][preferred_points,1], color="red")
-        plt.show()
+        # plt.scatter(Pareto_front[0][:,0], Pareto_front[0][:,1])
+        # plt.scatter(Pareto_front[0][preferred_points,0], Pareto_front[0][preferred_points,1], color="red")
+        # plt.show()
     def get_Decision_Maker_Data(self):
         return self.Pareto_front, self.preferred_points
 
