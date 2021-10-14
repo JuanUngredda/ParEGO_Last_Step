@@ -19,16 +19,15 @@ def Bayes_HVI_NO_HOLE_function_caller_test(rep):
     np.random.seed(rep)
 
 
-    max_number_DMqueries = [10]
-    first_query_iteration = [
-                             [ 30,40,50,60, 70, 80, 90]]
+    max_number_DMqueries = [1]
+    first_query_iteration = [[0, 1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 99]]
 
     for num_queries_idx in range(len(max_number_DMqueries)):
 
         for first_query_iteration_element in first_query_iteration[num_queries_idx]:
 
             folder = "RESULTS"
-            subfolder = "NO_HOLE_HVI_Bayes_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
+            subfolder = "NO_HOLE_HVI_Bayes_U_Lin_Assum_Tche_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
             cwd = os.getcwd()
             path = cwd + "/" + folder + "/"+subfolder
 
@@ -70,10 +69,9 @@ def Bayes_HVI_NO_HOLE_function_caller_test(rep):
             # --- Bayesian Inference Object on the Utility
 
             #utility functions assumed for the decision maker
-            Lin_u = Linear_utility_func(n_params=n_f)
             Tche_u = Tchevichev_utility_func(n_params=n_f)
-            u_funcs = [Tche_u]
-            BayesInferenceUtility = Inference_method(u_funcs)
+            assumed_u_funcs = [Tche_u]
+            BayesInferenceUtility = Inference_method(assumed_u_funcs)
 
             # #Utility of the decision maker
             # Lin_u = Linear_utility_func(n_params=n_f)
@@ -91,10 +89,12 @@ def Bayes_HVI_NO_HOLE_function_caller_test(rep):
 
 
             # --- Decision Maker interaction with the Front Class
+            Lin_u = Linear_utility_func(n_params=n_f)
+            u_funcs_true = [Lin_u]
             InteractionwithDecisionMakerClass = ParetoFrontGeneration(model=model_f,
                                                                       space=space,
                                                                       seed=rep,
-                                                                      utility=u_funcs)
+                                                                      utility=u_funcs_true)
 
             # true_dm_utility_function = InteractionwithDecisionMakerClass.get_true_utility_values()
             # true_dm_utility_parameters = InteractionwithDecisionMakerClass.get_true_parameters()

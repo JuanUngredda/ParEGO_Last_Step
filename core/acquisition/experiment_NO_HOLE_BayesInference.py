@@ -24,16 +24,20 @@ def NO_HOLE_function_caller_test(rep):
     #                          [0, 1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 99],
     #                          [0, 1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 94]]
 
+    # max_number_DMqueries = [1]
+    # first_query_iteration = [
+    #                          [1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 99]]
+
     max_number_DMqueries = [1]
     first_query_iteration = [
-                             [1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 99]]
+                             [0, 1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 99]]
 
     for num_queries_idx in range(len(max_number_DMqueries)):
 
         for first_query_iteration_element in first_query_iteration[num_queries_idx]:
 
             folder = "RESULTS"
-            subfolder = "NO_HOLE_Bayes_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
+            subfolder = "NO_HOLE_Bayes_U_Lin_Assum_Tche_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
             cwd = os.getcwd()
             path = cwd + "/" + folder + "/"+subfolder
 
@@ -75,10 +79,10 @@ def NO_HOLE_function_caller_test(rep):
             # --- Bayesian Inference Object on the Utility
 
             #utility functions assumed for the decision maker
-            Lin_u = Linear_utility_func(n_params=n_f)
+
             Tche_u = Tchevichev_utility_func(n_params=n_f)
-            u_funcs = [Tche_u]
-            BayesInferenceUtility = Inference_method(u_funcs)
+            assumed_u_funcs = [Tche_u]
+            BayesInferenceUtility = Inference_method(assumed_u_funcs)
 
             # #Utility of the decision maker
             # Lin_u = Linear_utility_func(n_params=n_f)
@@ -92,10 +96,14 @@ def NO_HOLE_function_caller_test(rep):
                                                           Inference_Object=BayesInferenceUtility)
 
             # --- Decision Maker interaction with the Front Class
+
+            #utility functions assumed for the decision maker
+            Lin_u = Linear_utility_func(n_params=n_f)
+            u_funcs_true = [Lin_u]
             InteractionwithDecisionMakerClass = ParetoFrontGeneration(model=model_f,
                                                                       space=space,
                                                                       seed=rep,
-                                                                      utility=u_funcs)
+                                                                      utility=u_funcs_true)
 
 
             evaluator = GPyOpt.core.evaluators.Sequential(EI_UU)
@@ -126,7 +134,7 @@ def NO_HOLE_function_caller_test(rep):
             X, Y, Opportunity_cost = bo.run_optimization(max_iter =100,
                                                             rep=rep,
                                                             path=path,
-                                                            verbosity=True,
+                                                            verbosity=False,
                                                              max_number_DMqueries=max_number_DMqueries[num_queries_idx],
                                                              first_query_iteration=first_query_iteration_element
                                                              )
@@ -136,9 +144,9 @@ def NO_HOLE_function_caller_test(rep):
         print("X",X,"Y",Y)
 
 # for rep in range(10):
-#  function_caller_test_function_2_penalty(rep)
+# function_caller_test_function_2_penalty(rep)
 # for rep in range(10):
-NO_HOLE_function_caller_test(1)
+# NO_HOLE_function_caller_test(4)
 # print("ready")
 
 

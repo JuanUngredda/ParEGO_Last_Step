@@ -27,7 +27,7 @@ def point_estimation_NO_HOLE_function_caller_test(rep):
         for first_query_iteration_element in first_query_iteration[num_queries_idx]:
 
             folder = "RESULTS"
-            subfolder = "NO_HOLE_point_estimation_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
+            subfolder = "NO_HOLE_point_estimation_U_Lin_Assum_Tche_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
             cwd = os.getcwd()
             path = cwd + "/" + folder + "/"+subfolder
 
@@ -69,10 +69,9 @@ def point_estimation_NO_HOLE_function_caller_test(rep):
             # --- Bayesian Inference Object on the Utility
 
             #utility functions assumed for the decision maker
-            Lin_u = Linear_utility_func(n_params=n_f)
             Tche_u = Tchevichev_utility_func(n_params=n_f)
-            u_funcs = [Tche_u]
-            BayesInferenceUtility = Inference_method(u_funcs)
+            assumed_u_funcs = [Tche_u]
+            BayesInferenceUtility = Inference_method(assumed_u_funcs)
 
             # #Utility of the decision maker
             # Lin_u = Linear_utility_func(n_params=n_f)
@@ -90,10 +89,12 @@ def point_estimation_NO_HOLE_function_caller_test(rep):
             evaluator = GPyOpt.core.evaluators.Sequential(EI_UU)
 
             # --- Decision Maker interaction with the Front Class
+            Lin_u = Linear_utility_func(n_params=n_f)
+            u_funcs_true = [Lin_u]
             InteractionwithDecisionMakerClass = ParetoFrontGeneration(model=model_f,
                                                                       space=space,
                                                                       seed=rep,
-                                                                      utility=u_funcs)
+                                                                      utility=u_funcs_true)
 
             AcquisitionwithDMInteration = AcquisitionFunctionandDecisionMakerInteraction(model=model_f,
                                                                                          true_f=f,
