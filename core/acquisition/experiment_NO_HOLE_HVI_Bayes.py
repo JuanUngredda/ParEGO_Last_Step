@@ -70,7 +70,9 @@ def Bayes_HVI_NO_HOLE_function_caller_test(rep):
 
             #utility functions assumed for the decision maker
             Tche_u = Tchevichev_utility_func(n_params=n_f)
-            assumed_u_funcs = [Tche_u]
+            Lin_u = Linear_utility_func(n_params=n_f)
+
+            assumed_u_funcs = [Lin_u]
             BayesInferenceUtility = Inference_method(assumed_u_funcs)
 
             # #Utility of the decision maker
@@ -89,8 +91,7 @@ def Bayes_HVI_NO_HOLE_function_caller_test(rep):
 
 
             # --- Decision Maker interaction with the Front Class
-            Lin_u = Linear_utility_func(n_params=n_f)
-            u_funcs_true = [Lin_u]
+            u_funcs_true = [Tche_u]
             InteractionwithDecisionMakerClass = ParetoFrontGeneration(model=model_f,
                                                                       space=space,
                                                                       seed=rep,
