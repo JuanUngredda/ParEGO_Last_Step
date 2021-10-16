@@ -148,7 +148,7 @@ def NO_HOLE_function_caller_test(rep):
 # for rep in range(10):
 # function_caller_test_function_2_penalty(rep)
 # for rep in range(10):
-NO_HOLE_function_caller_test(4)
+# NO_HOLE_function_caller_test(4)
 # print("ready")
 
 
