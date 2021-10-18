@@ -29,15 +29,14 @@ def NO_HOLE_function_caller_test(rep):
     #                          [1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 99]]
 
     max_number_DMqueries = [1]
-    first_query_iteration = [
-                             [0, 1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 99]]
+    first_query_iteration = [[0, 1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 99]]
 
     for num_queries_idx in range(len(max_number_DMqueries)):
 
         for first_query_iteration_element in first_query_iteration[num_queries_idx]:
 
             folder = "RESULTS"
-            subfolder = "NO_HOLE_Bayes_Assum_Lin_U_Tche_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
+            subfolder = "NO_HOLE_Bayes_Assum_Lin_U_Lin_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
             cwd = os.getcwd()
             path = cwd + "/" + folder + "/"+subfolder
 
@@ -101,7 +100,7 @@ def NO_HOLE_function_caller_test(rep):
 
             #utility functions assumed for the decision maker
 
-            u_funcs_true = [Tche_u]
+            u_funcs_true = [Lin_u]
             InteractionwithDecisionMakerClass = ParetoFrontGeneration(model=model_f,
                                                                       space=space,
                                                                       seed=rep,
@@ -148,7 +147,7 @@ def NO_HOLE_function_caller_test(rep):
 # for rep in range(10):
 # function_caller_test_function_2_penalty(rep)
 # for rep in range(10):
-# NO_HOLE_function_caller_test(4)
+# NO_HOLE_function_caller_test(3)
 # print("ready")
 
 

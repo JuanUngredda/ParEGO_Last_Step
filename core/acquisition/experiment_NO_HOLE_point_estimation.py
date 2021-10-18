@@ -27,7 +27,7 @@ def point_estimation_NO_HOLE_function_caller_test(rep):
         for first_query_iteration_element in first_query_iteration[num_queries_idx]:
 
             folder = "RESULTS"
-            subfolder = "NO_HOLE_point_estimation_Assum_Lin_U_Tche_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
+            subfolder = "NO_HOLE_point_estimation_Assum_Lin_U_Lin_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
             cwd = os.getcwd()
             path = cwd + "/" + folder + "/"+subfolder
 
@@ -92,7 +92,7 @@ def point_estimation_NO_HOLE_function_caller_test(rep):
 
             # --- Decision Maker interaction with the Front Class
 
-            u_funcs_true = [Tche_u]
+            u_funcs_true = [Lin_u]
             InteractionwithDecisionMakerClass = ParetoFrontGeneration(model=model_f,
                                                                       space=space,
                                                                       seed=rep,
