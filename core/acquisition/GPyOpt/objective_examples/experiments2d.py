@@ -331,27 +331,22 @@ class HOLE(function2d):
             x2ppp = x2pp * np.pi
 
             u = np.sin(x1ppp / 2.0)
-            v = (np.sin(x2ppp / 2.0)) ** 2.0
+            v = np.sin(x2ppp / 2.0) ** 2.0
 
-            if u < 0:
-                up = -(-u) ** (self.h)
-            else:
-                up = u ** (self.h)
-
+            up = np.zeros(len(u))
+            up[u < 0] =  -(-u) ** (self.h)
+            up[u >= 0] = u ** (self.h)
 
             vp = v ** (1.0 / self.h)
 
             t = up
             a = vp * 2.0 * self.p
 
-            if a <= self.p:
-                b = (self.p - a) * np.exp(self.q)
-            else:
-                b = 0
+            b = np.zeros(len(a))
+            b[a <= self.p] = (self.p - a) * np.exp(self.q)
 
-            d = (self.q / (2.0 * a)) + self.d0
+            d = (self.q /2.0) * a + self.d0
             c = self.q / (d ** 2.0)
-
 
             fval = ((t + 1)**2.0) + a + b* np.exp( -c * ( t - d) ** 2.0)
             # print("fval", fval)
@@ -377,22 +372,20 @@ class HOLE(function2d):
             u = np.sin(x1ppp / 2.0)
             v = (np.sin(x2ppp / 2.0)) ** 2.0
 
-            if u < 0:
-                up = -(-u) ** (self.h)
-            else:
-                up = u ** (self.h)
+            up = np.zeros(len(u))
+            up[u < 0] = -(-u) ** (self.h)
+            up[u >= 0] = u ** (self.h)
+
             vp = v ** (1.0 / self.h)
 
             t = up
             a = vp * 2.0 * self.p
 
-            # print("a",a, "self.p", self.p)
-            if a <= self.p:
-                b = (self.p - a) * np.exp(self.q)
-            else:
-                b = 0
+            b = np.zeros(len(a))
+            b[a <= self.p] = (self.p - a) * np.exp(self.q)
+
             # print("b", b)
-            d = (self.q / (2.0 * a)) + self.d0
+            d = (self.q /2.0) * a + self.d0
             c = self.q / (d ** 2.0)
 
             fval = ((t - 1) **2.0) + a + b * np.exp(-c * (t + d) ** 2.0)

@@ -7,33 +7,33 @@ from ParEGO_acquisition import ParEGO
 from bayesian_optimisation import BO
 import os
 from DecisionMakerLastStepsInteraction import AcquisitionFunctionandDecisionMakerInteraction
-from EI_UU_acquisition import ExpectedImprovementUtilityUncertainty
+from weighted_HVI_acquisition import HVI
 from utility_core import *
 #ALWAYS check cost in
 # --- Function to optimize
 
 
-def NO_HOLE_function_caller_test(rep):
+def Bayes_HVI_HOLE_Lin_function_caller_test(rep):
 
-    rep= rep + 20
+    rep = rep + 20
     noise = 1e-6
     np.random.seed(rep)
 
 
-    max_number_DMqueries = [1]
-    first_query_iteration = [[0, 1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 99]]
+    max_number_DMqueries = [0,1]
+    first_query_iteration = [[0],[0, 1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 99]]
 
     for num_queries_idx in range(len(max_number_DMqueries)):
 
         for first_query_iteration_element in first_query_iteration[num_queries_idx]:
 
             folder = "RESULTS"
-            subfolder = "NO_HOLE_Bayes_Assum_Lin_U_Lin_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
+            subfolder = "HOLE_HVI_Bayes_Assum_Lin_U_Lin_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
             cwd = os.getcwd()
             path = cwd + "/" + folder + "/"+subfolder
 
             # include function
-            func= NO_HOLE(sd=np.sqrt(noise))
+            func= HOLE(sd=np.sqrt(noise))
 
             # --- Attributes
             #repeat same objective function to solve a 1 objective problem
@@ -70,7 +70,6 @@ def NO_HOLE_function_caller_test(rep):
             # --- Bayesian Inference Object on the Utility
 
             #utility functions assumed for the decision maker
-
             Tche_u = Tchevichev_utility_func(n_params=n_f)
             Lin_u = Linear_utility_func(n_params=n_f)
 
@@ -83,30 +82,34 @@ def NO_HOLE_function_caller_test(rep):
             # true_u_funcs = [Lin_u]
 
             # --- Utility function
-            EI_UU = ExpectedImprovementUtilityUncertainty(model=model_f,
-                                                          space=space,
-                                                          optimizer = acq_opt,
-                                                          Inference_Object=BayesInferenceUtility)
+            HVI_acq = HVI(model=model_f,
+                        space=space,
+                        ref_point=[8,8],
+                        alpha=1.96,
+                        optimizer=acq_opt,
+                        Inference_Object=BayesInferenceUtility)
+
+
 
             # --- Decision Maker interaction with the Front Class
-
-            #utility functions assumed for the decision maker
-
             u_funcs_true = [Lin_u]
             InteractionwithDecisionMakerClass = ParetoFrontGeneration(model=model_f,
                                                                       space=space,
                                                                       seed=rep,
                                                                       utility=u_funcs_true)
 
+            # true_dm_utility_function = InteractionwithDecisionMakerClass.get_true_utility_values()
+            # true_dm_utility_parameters = InteractionwithDecisionMakerClass.get_true_parameters()
+            #
+            # HVI_acq.include_true_dm_utility_vals(true_dm_utility_function)
+            # HVI_acq.include_true_dm_utility_parameters(true_dm_utility_parameters)
 
-            evaluator = GPyOpt.core.evaluators.Sequential(EI_UU)
-
-
+            evaluator = GPyOpt.core.evaluators.Sequential(HVI_acq)
 
             AcquisitionwithDMInteration = AcquisitionFunctionandDecisionMakerInteraction(model=model_f,
                                                                                          true_f=f,
                                                                                          space=space,
-                                                                                         acquisition_f=EI_UU,
+                                                                                         acquisition_f=HVI_acq,
                                                                                          acquisition_optimiser=acq_opt,
                                                                                          InteractionClass = InteractionwithDecisionMakerClass,
                                                                                          Inference_Object=BayesInferenceUtility,
@@ -116,7 +119,7 @@ def NO_HOLE_function_caller_test(rep):
 
             bo = BO(model=model_f,
                     space=space,
-                    acquisition=EI_UU,
+                    acquisition=HVI_acq,
                     objective=f,
                     evaluator=evaluator,
                     X_init=initial_design,
@@ -127,7 +130,7 @@ def NO_HOLE_function_caller_test(rep):
             X, Y, Opportunity_cost = bo.run_optimization(max_iter =100,
                                                             rep=rep,
                                                             path=path,
-                                                            verbosity=False,
+                                                            verbosity = False,
                                                              max_number_DMqueries=max_number_DMqueries[num_queries_idx],
                                                              first_query_iteration=first_query_iteration_element
                                                              )
@@ -137,9 +140,9 @@ def NO_HOLE_function_caller_test(rep):
         print("X",X,"Y",Y)
 
 # for rep in range(10):
-# function_caller_test_function_2_penalty(rep)
+# Bayes_HVI_NO_HOLE_function_caller_test(3)
 # for rep in range(10):
-# NO_HOLE_function_caller_test(3)
+# Bayes_HVI_NO_HOLE_function_caller_test(2)
 # print("ready")
 
 

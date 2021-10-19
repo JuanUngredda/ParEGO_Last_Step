@@ -7,15 +7,15 @@ from ParEGO_acquisition import ParEGO
 from bayesian_optimisation import BO
 import os
 from DecisionMakerLastStepsInteraction import AcquisitionFunctionandDecisionMakerInteraction
-from EI_UU_acquisition import ExpectedImprovementUtilityUncertainty
+from point_estimation_EI_UU_acquisition import ExpectedImprovementUtilityUncertaintywithPointUtility
 from utility_core import *
 #ALWAYS check cost in
 # --- Function to optimize
 
 
-def NO_HOLE_function_caller_test(rep):
+def point_estimation_HOLE_function_Lin_caller_test(rep):
 
-    rep= rep + 20
+    rep = rep
     noise = 1e-6
     np.random.seed(rep)
 
@@ -28,12 +28,12 @@ def NO_HOLE_function_caller_test(rep):
         for first_query_iteration_element in first_query_iteration[num_queries_idx]:
 
             folder = "RESULTS"
-            subfolder = "NO_HOLE_Bayes_Assum_Lin_U_Lin_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
+            subfolder = "HOLE_point_estimation_Assum_Lin_U_Lin_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
             cwd = os.getcwd()
             path = cwd + "/" + folder + "/"+subfolder
 
             # include function
-            func= NO_HOLE(sd=np.sqrt(noise))
+            func= HOLE(sd=np.sqrt(noise))
 
             # --- Attributes
             #repeat same objective function to solve a 1 objective problem
@@ -70,7 +70,6 @@ def NO_HOLE_function_caller_test(rep):
             # --- Bayesian Inference Object on the Utility
 
             #utility functions assumed for the decision maker
-
             Tche_u = Tchevichev_utility_func(n_params=n_f)
             Lin_u = Linear_utility_func(n_params=n_f)
 
@@ -83,25 +82,22 @@ def NO_HOLE_function_caller_test(rep):
             # true_u_funcs = [Lin_u]
 
             # --- Utility function
-            EI_UU = ExpectedImprovementUtilityUncertainty(model=model_f,
+            EI_UU = ExpectedImprovementUtilityUncertaintywithPointUtility(model=model_f,
                                                           space=space,
                                                           optimizer = acq_opt,
                                                           Inference_Object=BayesInferenceUtility)
 
-            # --- Decision Maker interaction with the Front Class
 
-            #utility functions assumed for the decision maker
+
+            evaluator = GPyOpt.core.evaluators.Sequential(EI_UU)
+
+            # --- Decision Maker interaction with the Front Class
 
             u_funcs_true = [Lin_u]
             InteractionwithDecisionMakerClass = ParetoFrontGeneration(model=model_f,
                                                                       space=space,
                                                                       seed=rep,
                                                                       utility=u_funcs_true)
-
-
-            evaluator = GPyOpt.core.evaluators.Sequential(EI_UU)
-
-
 
             AcquisitionwithDMInteration = AcquisitionFunctionandDecisionMakerInteraction(model=model_f,
                                                                                          true_f=f,
@@ -136,10 +132,11 @@ def NO_HOLE_function_caller_test(rep):
 
         print("X",X,"Y",Y)
 
+# point_estimation_HOLE_function_caller_test(1)
 # for rep in range(10):
-# function_caller_test_function_2_penalty(rep)
+#  function_caller_test_function_2_penalty(rep)
 # for rep in range(10):
-# NO_HOLE_function_caller_test(3)
+# point_estimation_NO_HOLE_function_caller_test(1)
 # print("ready")
 
 
