@@ -218,9 +218,10 @@ class HVI(AcquisitionBase):
             P = self.model.get_Y_values()
 
             # non_dominated_vectors = np.array(non_dominated_vectors).squeeze()
-
-            # plt.scatter(-generated_mu_values[:, 0], -generated_mu_values[:, 1], color="red")
-            plt.scatter(-np.array(non_dominated_surface)[:,0],-np.array(non_dominated_surface)[:,1], color="yellow" )
+            # X = initial_design('latin', self.space, 500)
+            # generated_mu_values = self.generate_mu_values()
+            # plt.scatter(generated_mu_values[:, 0], generated_mu_values[:, 1], color="grey", label="dominated area")
+            # plt.scatter(-np.array(non_dominated_surface)[:,0],-np.array(non_dominated_surface)[:,1], color="yellow" )
             # plt.scatter(-non_dominated_front[:, 0], -non_dominated_front[:, 1], color="blue")
 
             for ndpoint in non_dominated_surface:
@@ -235,8 +236,9 @@ class HVI(AcquisitionBase):
             plt.scatter(-non_dominated_surface[:,0], -non_dominated_surface[:,1],
                         c=np.array(utility_vector).reshape(-1))
             # print(newy)
-            plt.scatter(-newy[0], -newy[1], color="magenta")
-            plt.scatter(P[0], P[1], color="red")
+            plt.scatter(-newy[0], -newy[1], color="magenta", label="fantasised point")
+            plt.scatter(P[0], P[1], color="red", label="sampled $Y$ points")
+            plt.legend()
             plt.show()
 
         else:
