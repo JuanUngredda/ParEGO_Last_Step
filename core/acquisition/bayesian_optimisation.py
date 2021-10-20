@@ -422,7 +422,7 @@ class BO(object):
 
             path = self.path +"/" + results_folder + '/it_' + str(self.rep) + '.csv'
             if os.path.isdir(self.path +"/" + results_folder  ) == False:
-                os.makedirs(self.path +"/" + results_folder  )
+                os.makedirs(self.path +"/" + results_folder  , exist_ok=True)
 
             gen_file.to_csv(path_or_buf=path)
 

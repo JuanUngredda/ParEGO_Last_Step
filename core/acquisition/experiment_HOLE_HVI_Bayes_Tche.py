@@ -21,7 +21,7 @@ def Bayes_HVI_HOLE_function_Tche_caller_test(rep):
 
 
     max_number_DMqueries = [1]
-    first_query_iteration = [[0, 1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 99]]
+    first_query_iteration = [[1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 99]]
 
     for num_queries_idx in range(len(max_number_DMqueries)):
 
@@ -140,7 +140,7 @@ def Bayes_HVI_HOLE_function_Tche_caller_test(rep):
         print("X",X,"Y",Y)
 
 # for rep in range(10):
-# Bayes_HVI_NO_HOLE_function_caller_test(3)
+Bayes_HVI_HOLE_function_Tche_caller_test(3)
 # for rep in range(10):
 # Bayes_HVI_NO_HOLE_function_caller_test(2)
 # print("ready")
