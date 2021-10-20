@@ -118,7 +118,7 @@ ALL_CSC_NAMES = ["rilyeno", "torta", "adobo", "bulalo", "kinilaw", "okoy",
 #U = [0,2,3,4,5,6,7,8]
 #python fork0_to_csc.py /home/rawsys/matjiu/ParEGO_Last_Step/core/acquisition/KG_control.py 8 --first_fork adobo --basedir /home/rawsys/matjiu/RESULTS_HVI --conda BOPL
 
-U = [1,3,5,8,9,15,16, 17, 20]#
+U = [1,3,5,6,7,8,9,11,15,16]#
 
 CSC_NAMES = [ALL_CSC_NAMES[i] for i in U]
 

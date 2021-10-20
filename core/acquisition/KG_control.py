@@ -54,9 +54,7 @@ def run(args):
     # IMPORT AND RUN MODULES
     #functions = [function_caller_new_brannin_TS, function_caller_test_func_2_TS, function_caller_mistery_TS, function_caller_RMITD_TS, function_caller_RMITD_EI, function_caller_RMITD]
     #functions = [function_caller_RMITD ]
-    functions = [perfect_information_EI_UU_HOLE_function_caller_test,
-                 HOLE_function_Tche_caller_test,
-                 point_estimation_HOLE_function_Tche_caller_test,
+    functions = [
                  Bayes_HVI_HOLE_function_Tche_caller_test]
 
     for func in functions:
