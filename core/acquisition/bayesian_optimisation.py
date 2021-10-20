@@ -431,6 +431,7 @@ class BO(object):
             extra_path = self.path + "/" + results_folder + '/parameters_'+str(self.rep)+'.csv'
             extra_gen_file.to_csv(path_or_buf=extra_path)
 
+        print("path", self.path + "/" + results_folder)
 
     def get_true_utility_function(self):
         return self.DecisionMakerInteractor.get_true_utility_function()
