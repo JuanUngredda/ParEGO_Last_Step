@@ -7,33 +7,31 @@ from ParEGO_acquisition import ParEGO
 from bayesian_optimisation import BO
 import os
 from DecisionMakerLastStepsInteraction import AcquisitionFunctionandDecisionMakerInteraction
-from weighted_HVI_acquisition import HVI
+from HVI_acquisition_usingposteriormeanastarget import HVI
 from utility_core import *
 #ALWAYS check cost in
 # --- Function to optimize
 
 
-def Bayes_HVI_HOLE_function_Tche_caller_test(rep):
+def Bayes_HVI_NO_HOLE_gp_mean_function_caller_test(rep):
 
-    rep = rep
     noise = 1e-6
     np.random.seed(rep)
 
-
-    max_number_DMqueries = [10]
-    first_query_iteration = [[1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 89]]
+    max_number_DMqueries = [0]
+    first_query_iteration = [[0]]
 
     for num_queries_idx in range(len(max_number_DMqueries)):
 
         for first_query_iteration_element in first_query_iteration[num_queries_idx]:
 
             folder = "RESULTS"
-            subfolder = "HOLE_HVI_Bayes_Assum_Tche_U_Tche_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
+            subfolder = "NO_HOLE_HVI_Bayes_posterior_mean_as_target_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
             cwd = os.getcwd()
             path = cwd + "/" + folder + "/"+subfolder
 
             # include function
-            func= HOLE(sd=np.sqrt(noise))
+            func= NO_HOLE(sd=np.sqrt(noise))
 
             # --- Attributes
             #repeat same objective function to solve a 1 objective problem
@@ -73,7 +71,7 @@ def Bayes_HVI_HOLE_function_Tche_caller_test(rep):
             Tche_u = Tchevichev_utility_func(n_params=n_f)
             Lin_u = Linear_utility_func(n_params=n_f)
 
-            assumed_u_funcs = [Tche_u]
+            assumed_u_funcs = [Lin_u]
             BayesInferenceUtility = Inference_method(assumed_u_funcs)
 
             # #Utility of the decision maker
@@ -92,7 +90,7 @@ def Bayes_HVI_HOLE_function_Tche_caller_test(rep):
 
 
             # --- Decision Maker interaction with the Front Class
-            u_funcs_true = [Tche_u]
+            u_funcs_true = [Lin_u]
             InteractionwithDecisionMakerClass = ParetoFrontGeneration(model=model_f,
                                                                       space=space,
                                                                       seed=rep,
@@ -123,7 +121,7 @@ def Bayes_HVI_HOLE_function_Tche_caller_test(rep):
                     objective=f,
                     evaluator=evaluator,
                     X_init=initial_design,
-                    DecisionMakerInteractor = AcquisitionwithDMInteration)
+                    DecisionMakerInteractor = None)#AcquisitionwithDMInteration)
 
 
             # print("Finished Initialization")
@@ -140,7 +138,7 @@ def Bayes_HVI_HOLE_function_Tche_caller_test(rep):
         print("X",X,"Y",Y)
 
 # for rep in range(10):
-Bayes_HVI_HOLE_function_Tche_caller_test(3)
+# Bayes_HVI_NO_HOLE_function_caller_test(3)
 # for rep in range(10):
 # Bayes_HVI_NO_HOLE_function_caller_test(2)
 # print("ready")

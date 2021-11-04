@@ -214,7 +214,7 @@ class HVI(AcquisitionBase):
         newy = np.array(newy).reshape(-1)
         utility_vector = []
 
-        if self.verbose:
+        if True: #self.verbose:
             P = self.model.get_Y_values()
 
             # non_dominated_vectors = np.array(non_dominated_vectors).squeeze()
@@ -233,11 +233,15 @@ class HVI(AcquisitionBase):
                     utility_vector.append(utility_val)
                 else:
                     utility_vector.append(0)
-            plt.scatter(-non_dominated_surface[:,0], -non_dominated_surface[:,1],
-                        c=np.array(utility_vector).reshape(-1))
-            # print(newy)
+            mask = np.array(utility_vector).reshape(-1)>0
+            plt.scatter(-non_dominated_surface[:,0][mask], -non_dominated_surface[:,1][mask],
+                        c=np.array(utility_vector).reshape(-1)[mask])
+            #
             plt.scatter(-newy[0], -newy[1], color="magenta", label="fantasised point")
             plt.scatter(P[0], P[1], color="red", label="sampled $Y$ points")
+            plt.ylabel("$y_{2}$")
+            plt.xlabel("$y_{1}$")
+            plt.title("objective space (maximisation)")
             plt.legend()
             plt.show()
 

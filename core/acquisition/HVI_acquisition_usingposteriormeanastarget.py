@@ -10,7 +10,8 @@ import scipy
 import time
 import matplotlib.pyplot as plt
 from pygmo import hypervolume
-
+from pygmo import *
+from pyDOE import *
 
 class HVI(AcquisitionBase):
     """
@@ -27,7 +28,7 @@ class HVI(AcquisitionBase):
     def __init__(self, model, space, alpha=1.95,optimizer=None,ref_point=None,cost_withGradients=None, Inference_Object=None):
 
         self.MCMC = False
-
+        self.output_dimensions = model.output_dim
         self.counter = 0
         self.Inference_Object = Inference_Object
         self.name = "Constrained_HVI"
@@ -37,6 +38,7 @@ class HVI(AcquisitionBase):
         self.old_number_of_simulation_samples = 0
         self.old_number_of_dm_samples = 0
         self.true_utility_values=None
+        self.historic_X = 0
         self.posterior_samples = self.get_posterior_samples()
         super(HVI, self).__init__(model, space, optimizer,alpha=alpha, cost_withGradients=cost_withGradients)
         if cost_withGradients == None:
@@ -76,7 +78,6 @@ class HVI(AcquisitionBase):
         """
         # print("_compute_acq")
 
-
         X =np.atleast_2d(X)
         if self.ref_point is None:
             self.ref_point = self.ref_point_computation()
@@ -102,13 +103,51 @@ class HVI(AcquisitionBase):
 
         return HVI
 
+    def Generate_Pareto_Front(self):
+        X_train = self.model.get_X_values()
+        GP_y_predictions  = self.mean_prediction_model(X_train ,self.model)
 
+
+        bounds = self.space.get_continuous_bounds()
+        bounds = self.bounds_format_adapter(bounds)
+        udp = GA(f=GP_y_predictions, bounds=bounds, n_obj=self.output_dimensions)
+        pop = population(prob=udp, size=40)
+        algo = algorithm(nsga2(gen=300))
+        pop = algo.evolve(pop)
+        fits, vectors = pop.get_f(), pop.get_x()
+        ndf, dl, dc, ndr = fast_non_dominated_sorting(fits)
+        result_x = vectors[ndf[0]]
+        result_fx = fits[ndf[0]]
+
+        return -result_fx  # GP_y_predictions
+
+    def bounds_format_adapter(self, bounds):
+        bounds = np.array(bounds)
+        bounds_correct_format = []
+        for b in range(bounds.shape[0]):
+            bounds_correct_format.append(list(bounds[:, b]))
+        return bounds_correct_format
+
+    def mean_prediction_model(self, X, model):
+        def prediction(X):
+            X = np.atleast_2d(X)
+
+            mu_x = model.posterior_mean(X)
+            mu_x = np.vstack(mu_x).T
+            return mu_x
+        return prediction
 
     def compute_HVI_LCB(self, X):
         X = np.atleast_2d(X)
 
-        P = self.model.get_Y_values()
-        P_cur = (-np.concatenate(P,axis=1)).tolist()
+        if X.shape[0] != self.historic_X:
+            self.historic_X = X.shape[0]
+            self.non_dominated_surface = self.Generate_Pareto_Front()
+
+        non_dominated_surface = self.non_dominated_surface
+        P = (- non_dominated_surface).tolist()
+        P_cur =  (-non_dominated_surface).tolist()
+
 
         HV0_func = hypervolume(P_cur)
         HV0 = HV0_func.compute(ref_point=self.ref_point)
@@ -122,20 +161,16 @@ class HVI(AcquisitionBase):
 
             y_lcb = mu - self.alpha * np.sqrt(var)
             y_lcb = np.transpose(y_lcb)
-            P_new = (-np.concatenate(P,axis=1)).tolist()
+            P_new = P
             P_new = np.vstack([P_new, y_lcb])
             hv_new = hypervolume(P_new.tolist())
+
             try:
                 HV_new= hv_new.compute(ref_point = self.ref_point)
             except:
                 print("warwning! points outside reference")
                 HV_new =0
             HVvals[i] = HV_new - HV0
-
-            if HVvals[i] <0:
-                Expected_utility_vals[i]= self.min_util
-            else:
-                Expected_utility_vals[i]=self.get_posterior_utility_landscape(-mu.reshape(-1)).reshape(-1)
 
         HVvals[HVvals < 0.0] = 0.0
 
@@ -195,3 +230,28 @@ class HVI(AcquisitionBase):
 
         # print("inner_opt_x, inner_opt_val",inner_opt_x, inner_opt_val)
 
+class GA:
+    # Define objectives
+    def __init__(self, f, bounds, n_obj):
+        self.f = f
+        self.bounds = bounds
+        self.n_obj = n_obj
+    def fitness(self, x):
+        x = np.atleast_2d(x)
+        output = self.f(x)
+        vect_func_val = []
+        for i in range(self.n_obj):
+            vect_func_val.append(output[:,i])
+        return -np.array(vect_func_val).reshape(-1)
+
+    # Return number of objectives
+    def get_nobj(self):
+        return self.n_obj
+
+    # Return bounds of decision variables
+    def get_bounds(self):
+        return self.bounds  # ([0]*1, [2]*1)
+
+    # Return function name
+    def get_name(self):
+        return "INNER OPTIMISATION PROBLEM"

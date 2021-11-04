@@ -149,9 +149,9 @@ class BO(object):
         self.Y_new = self.Y
         self.Opportunity_Cost = {"Hypervolume": np.array([])}
         self.data = {}
-        self.data["Utility"] = np.array([])
+
         self.data["Utility_sampled"] = np.array([])
-        self.data["Best_Utility"] = np.array([])
+
         value_so_far = []
 
         # --- Initialize time cost of the evaluations
@@ -310,24 +310,24 @@ class BO(object):
         # best_HVI = self.acquisition._compute_acq(self.suggested_sample)
         # raise
 
-        # HVI = self.acquisition._compute_acq(design_plot)
+        HVI = self.acquisition._compute_acq(design_plot)
 
         # weighted_surface = self.acquisition.weighting_surface(design_plot)
-        true_underlying_utility = self.get_true_utility_function()
-        true_parameters = self.get_true_parameters()
-
-        true_utility_values = true_underlying_utility(y = func_val,
-                                                   weights=true_parameters[1],
-                                                   parameters=true_parameters[0])
+        # true_underlying_utility = self.get_true_utility_function()
+        # true_parameters = self.get_true_parameters()
+        #
+        # true_utility_values = true_underlying_utility(y = func_val,
+        #                                            weights=true_parameters[1],
+        #                                            parameters=true_parameters[0])
         fig, axs = plt.subplots(2, 2)
         axs[0, 0].set_title('True PF Function')
-        axs[0, 0].scatter(func_val[:, 0], func_val[:, 1], c=np.array(true_utility_values).reshape(-1) )
+        axs[0, 0].scatter(func_val[:, 0], func_val[:, 1])#, c=np.array(true_utility_values).reshape(-1) )
 
         Yvals = self.model.get_Y_values()
         Yvals = np.stack(Yvals, axis=1)
 
-        true_best_x, true_best_val = self.compute_underlying_best()
-        true_best_y, _ = self.objective.evaluate(true_best_x)
+        # true_best_x, true_best_val = self.compute_underlying_best()
+        # true_best_y, _ = self.objective.evaluate(true_best_x)
 
         # Pareto_front, preferred_points = self.acquisition.get_sampled_data()
         # Last_PF = Pareto_front[-1]
@@ -336,13 +336,13 @@ class BO(object):
         # preferred_point = Last_PF[Last_preferred_point_idx]
 
         axs[0, 1].set_title("GP(X)")
-        axs[0, 1].scatter(func_val[:, 0], func_val[:, 1], c=np.array(true_utility_values).reshape(-1))
-        # axs[0, 1].scatter(mu_f[:,0], mu_f[:,1], c= np.array(HVI).reshape(-1))
+        # axs[0, 1].scatter(func_val[:, 0], func_val[:, 1], c=np.array(true_utility_values).reshape(-1))
+        axs[0, 1].scatter(mu_f[:,0], mu_f[:,1], c= np.array(HVI).reshape(-1))
         # axs[0, 1].scatter(mu_f[:, 0], mu_f[:, 1], c=weighted_surface.reshape(-1))
         axs[0,1].scatter(mu_predicted_best[:,0],mu_predicted_best[:,1] , color="magenta")
         # axs[0,1].scatter(preferred_point[0], preferred_point[1], color="red")
         axs[0, 1].scatter(Yvals[:, 0], Yvals[:, 1], color="orange")
-        axs[0, 1].scatter(true_best_y[ 0], true_best_y[1], color="red")
+        # axs[0, 1].scatter(true_best_y[ 0], true_best_y[1], color="red")
         axs[0, 1].legend()
 
         posterior_samples = self.acquisition.get_posterior_samples()
@@ -387,38 +387,50 @@ class BO(object):
 
     def store_results(self, recommended_x):
 
-        true_underlying_utility = self.get_true_utility_function()
-        true_parameters = self.get_true_parameters()
+        if self.DecisionMakerInteractor is None:
+
+            P = self.model.get_Y_values()
+            P_cur = (-np.concatenate(P, axis=1)).tolist()
+
+            print("P_cur", P_cur)
+            print("ref", self.acquisition.ref_point)
+            HV0_func = hypervolume(P_cur)
+            uval_sampled = HV0_func.compute(ref_point=self.acquisition.ref_point)
+
+        else:
+            true_underlying_utility = self.get_true_utility_function()
+            true_parameters = self.get_true_parameters()
 
 
-        Y_recommended, cost_new = self.objective.evaluate(recommended_x)
-        Y_recommended = np.concatenate(Y_recommended, axis=1)
-        true_recommended_utility = true_underlying_utility(y = Y_recommended,
-                                       weights=true_parameters[1],
-                                       parameters=true_parameters[0])
+            Y_recommended, cost_new = self.objective.evaluate(recommended_x)
+            Y_recommended = np.concatenate(Y_recommended, axis=1)
+            true_recommended_utility = true_underlying_utility(y = Y_recommended,
+                                           weights=true_parameters[1],
+                                           parameters=true_parameters[0])
 
-        out = true_recommended_utility.reshape(-1)
+            out = true_recommended_utility.reshape(-1)
 
-        self.data["Utility"] = np.concatenate((self.data["Utility"], np.array(out).reshape(-1)))
+            self.data["Utility"] = np.concatenate((self.data["Utility"], np.array(out).reshape(-1)))
 
-        Y_train = self.model.get_Y_values()
-        Y_train = np.concatenate(Y_train, axis=1)
-
-
-        uval_sampled = np.max(true_underlying_utility(y=Y_train,
-                                                       weights=true_parameters[1],
-                                                       parameters=true_parameters[0]))
+            Y_train = self.model.get_Y_values()
+            Y_train = np.concatenate(Y_train, axis=1)
 
 
-        N_entries = len(self.data["Utility"].reshape(-1))
+            uval_sampled = np.max(true_underlying_utility(y=Y_train,
+                                                           weights=true_parameters[1],
+                                                           parameters=true_parameters[0]))
+
+            N_entries = len(self.data["Utility"].reshape(-1))
+            true_best_x, true_best_val = self.compute_underlying_best()
+            self.data["Best_Utility"] = np.repeat(true_best_val, N_entries)
+
+
         self.data["Utility_sampled"] = np.concatenate((self.data["Utility_sampled"], np.array(uval_sampled).reshape(-1)))
 
-        true_best_x, true_best_val = self.compute_underlying_best()
-        self.data["Best_Utility"] = np.repeat(true_best_val , N_entries)
 
         if self.path is not None:
             gen_file = pd.DataFrame.from_dict(self.data)
-            results_folder = "UtilityWithoutNLastSteps"
+            results_folder = "Hypervolume_improve"
 
             path = self.path +"/" + results_folder + '/it_' + str(self.rep) + '.csv'
             if os.path.isdir(self.path +"/" + results_folder  ) == False:
@@ -426,10 +438,10 @@ class BO(object):
 
             gen_file.to_csv(path_or_buf=path)
 
-            extra_data ={"parameters":true_parameters, "number_of_queries":self.number_of_queries_taken}
-            extra_gen_file = pd.DataFrame.from_dict(extra_data)
-            extra_path = self.path + "/" + results_folder + '/parameters_'+str(self.rep)+'.csv'
-            extra_gen_file.to_csv(path_or_buf=extra_path)
+            # extra_data ={"parameters":true_parameters, "number_of_queries":self.number_of_queries_taken}
+            # extra_gen_file = pd.DataFrame.from_dict(extra_data)
+            # extra_path = self.path + "/" + results_folder + '/parameters_'+str(self.rep)+'.csv'
+            # extra_gen_file.to_csv(path_or_buf=extra_path)
 
         print("path", self.path + "/" + results_folder)
 
