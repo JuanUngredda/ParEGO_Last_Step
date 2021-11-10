@@ -34,26 +34,73 @@ class prior_sample_generator:
 
 import matplotlib.pyplot as plt
 class Inference_method():
-    def __init__(self, u_funcs, Likelihood_name="HardBounds"):
-        self.u_funcs = u_funcs
-        self.wdim = len(u_funcs)
-        self.tindvdim = [u.n_params for u in u_funcs]
-        self.tdim = np.sum([u.n_params for u in u_funcs])
-        self.m_dim = self.tdim + self.wdim
-        self.u_function = composed_utility_functions(u_funcs)
+    def __init__(self, u_funcs, Likelihood_name="HardBounds", names=None, Dynamic_Utility_Selection=False):
+
+        self.Dynamic_Utility_Selection = Dynamic_Utility_Selection
+        if Dynamic_Utility_Selection:
+            self.names =names
+            self.u_funcs = u_funcs
+            self.wdim = len(u_funcs[0])
+            self.tindvdim = [u.n_params for u in u_funcs[0]]
+            self.tdim = np.sum([u.n_params for u in u_funcs[0]])
+            self.m_dim = self.tdim + self.wdim
+            self.u_function = composed_utility_functions(u_funcs[0])
+        else:
+            self.u_function = composed_utility_functions(u_funcs)
+
+            self.u_funcs = u_funcs
+            self.wdim = len(u_funcs)
+            self.tindvdim = [u.n_params for u in u_funcs]
+            self.tdim = np.sum([u.n_params for u in u_funcs])
+            self.m_dim = self.tdim + self.wdim
+
         self.posterior_samples = None
         self.Pareto_front  = None
         self.preferred_points = None
         self.Likelihood_name = Likelihood_name
 
+
     def update_sampled_data(self, Pareto_front, preferred_points):
         self.Pareto_front = Pareto_front
         self.preferred_points = preferred_points
 
-
-        # plt.scatter(Pareto_front[0][:,0], Pareto_front[0][:,1])
+        if self.Dynamic_Utility_Selection:
+            Probability_Data = self.BIC_computation(u_funcs=self.u_funcs)
+            print("Probability_Data", Probability_Data)
+            Best_Model = self.u_funcs[np.argmax(Probability_Data)]
+            print("Best Model name", self.names[np.argmax(Probability_Data)])
+            self.u_function = composed_utility_functions(u_funcs=Best_Model)
+            # raise
+            # plt.scatter(Pareto_front[0][:,0], Pareto_front[0][:,1])
         # plt.scatter(Pareto_front[0][preferred_points,0], Pareto_front[0][preferred_points,1], color="red")
         # plt.show()
+
+    def BIC_computation(self, u_funcs):
+        Data_Likelihood_list = []
+        Likelihood_list = []
+        for ufun in u_funcs:
+            print(ufun)
+            self.u_function = composed_utility_functions(ufun)
+            parameter_samples, weights = self.posterior_sampler(n_samples=20, sampling_limit=1000)
+
+            print("param samples", parameter_samples)
+            if len(np.array(parameter_samples).squeeze())==0:
+                Likelihood = 0
+            else:
+
+                expected_parameter = [np.atleast_2d(ps[0]) for ps in parameter_samples]
+                expected_weight = [weights[0]]
+
+                Likelihood = self.Likelihood(theta=expected_parameter,
+                                             weights=expected_weight)
+            Num_data = len(self.Pareto_front)
+            parameter_dim = ufun[0].n_params
+            Data_Likelihood = Likelihood * (Num_data)**(-np.abs(parameter_dim)/2.0)
+            Likelihood_list.append(Likelihood)
+            Data_Likelihood_list.append(Data_Likelihood)
+        print("Likelihood list", Likelihood_list)
+        return Data_Likelihood_list
+
     def get_Decision_Maker_Data(self):
         return self.Pareto_front, self.preferred_points
 
@@ -107,10 +154,11 @@ class Inference_method():
             samples = random_state.dirichlet(np.ones((dim,)), n_samples)
         return samples
 
-    def posterior_sampler(self, n_samples, seed=None, warmup=100):
+    def posterior_sampler(self, n_samples, seed=None, warmup=0, sampling_limit=100000):
         # Metropolis-Hasting algorithm. proposal distribution is the dirichlet prior.
         np.random.seed(seed)
         accepted_samples = 0
+        total_generated_samples = 0
 
         seed_prior_sample = self.prior_sampler(n_samples=1, seed=None)
 
@@ -124,6 +172,11 @@ class Inference_method():
         samples_w = np.zeros((n_samples + warmup, self.wdim))
 
         while accepted_samples < n_samples + warmup:
+            total_generated_samples+=1
+
+            if total_generated_samples> sampling_limit:
+                break
+
             candidate_sample = self.prior_sampler(n_samples=1, seed=None)
 
             lik_cadidate = self.Likelihood(theta=candidate_sample[0],
@@ -144,10 +197,13 @@ class Inference_method():
 
         removed_samples_t = []
         for st in samples_t:
-            removed_samples_t.append(st[warmup:])
 
-        self.posterior_samples = removed_samples_t, samples_w[warmup:]
-        return removed_samples_t, samples_w[warmup:]
+            non_zero_idx = np.sum(st[warmup:], axis=1)
+            removed_samples_t.append(st[warmup:][non_zero_idx==1.])
+
+        self.posterior_samples = removed_samples_t, samples_w[warmup:][non_zero_idx==1.]
+
+        return removed_samples_t, samples_w[warmup:][non_zero_idx==1.]
 
     def get_generated_posterior_samples(self):
         return self.posterior_samples
@@ -185,6 +241,7 @@ class Inference_method():
         Lik_val = np.product(log_lik, axis=0)
 
         return Lik_val
+
 
     def PlacketLuceModel(self, theta, weights, log=False, verbose=False):
 

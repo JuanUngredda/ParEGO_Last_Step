@@ -68,6 +68,7 @@ class composed_utility_functions:
         else:
 
             util = np.zeros((weights.shape[0], y.shape[0], len(self.u_funcs)))
+
             for ufun in range(len(self.u_funcs)):
                 out = self.u_funcs[ufun](y, parameters[ufun])
 

@@ -138,7 +138,7 @@ def Bayes_HVI_HOLE_gp_mean_function_caller_test(rep):
         print("X",X,"Y",Y)
 
 # for rep in range(10):
-# Bayes_HVI_NO_HOLE_function_caller_test(3)
+# Bayes_HVI_HOLE_gp_mean_function_caller_test(3)
 # for rep in range(10):
 # Bayes_HVI_NO_HOLE_function_caller_test(2)
 # print("ready")

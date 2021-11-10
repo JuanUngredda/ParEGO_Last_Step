@@ -151,7 +151,8 @@ class BO(object):
         self.data = {}
 
         self.data["Utility_sampled"] = np.array([])
-
+        self.data["Utility"] = np.array([])
+        self.data["Best_Utility"] = np.array([])
         value_so_far = []
 
         # --- Initialize time cost of the evaluations

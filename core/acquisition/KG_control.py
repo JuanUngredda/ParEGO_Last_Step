@@ -5,16 +5,8 @@ import os
 import argparse
 
 
-# from experiment_NO_HOLE_BayesInference import NO_HOLE_function_caller_test
-# from experiment_NO_HOLE_point_estimation import point_estimation_NO_HOLE_function_caller_test
-# from experiment_NO_HOLE_HVI_Bayes import Bayes_HVI_NO_HOLE_function_caller_test
-
-from experiment_NO_HOLE_HVI_Bayes_usingposteriormeanastarget import Bayes_HVI_NO_HOLE_gp_mean_function_caller_test
-from experiment_NO_HOLE_HVI_Bayes_usingsamplesastarget import Bayes_HVI_NO_HOLE_sampled_function_caller_test
-
-from experiment_HOLE_HVI_Bayes_usingsamplesastarget import Bayes_HVI_HOLE_sampled_function_caller_test
-from experiment_HOLE_HVI_Bayes_usingposteriormeanastarget import Bayes_HVI_HOLE_gp_mean_function_caller_test
-
+from experiment_HOLE_BayesInference_MM import HOLE_function_Lin_caller_test
+from experiment_NO_HOLE_BayesInference_MM import NO_HOLE_function_Lin_caller_test
 
 # This is a bare script that receives args, prints something, wastes some time,function_caller_test_func_2_TS
 # and saves something. Use this as a blank template to run experiments.
@@ -56,10 +48,8 @@ def run(args):
     # IMPORT AND RUN MODULES
     #functions = [function_caller_new_brannin_TS, function_caller_test_func_2_TS, function_caller_mistery_TS, function_caller_RMITD_TS, function_caller_RMITD_EI, function_caller_RMITD]
     #functions = [function_caller_RMITD ]
-    functions = [Bayes_HVI_NO_HOLE_gp_mean_function_caller_test,
-                 Bayes_HVI_NO_HOLE_sampled_function_caller_test,
-                 Bayes_HVI_HOLE_sampled_function_caller_test,
-                 Bayes_HVI_HOLE_gp_mean_function_caller_test]
+    functions = [HOLE_function_Lin_caller_test,
+                 NO_HOLE_function_Lin_caller_test]
 
     for func in functions:
         func(args.k)
