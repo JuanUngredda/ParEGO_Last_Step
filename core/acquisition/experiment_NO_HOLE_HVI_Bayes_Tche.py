@@ -13,9 +13,9 @@ from utility_core import *
 # --- Function to optimize
 
 
-def Bayes_HVI_HOLE_Lin_function_caller_test(rep):
+def Bayes_HVI_NO_HOLE_Tche_function_caller_test(rep):
 
-    rep = rep + 20
+    rep = rep
     noise = 1e-6
     np.random.seed(rep)
 
@@ -30,12 +30,12 @@ def Bayes_HVI_HOLE_Lin_function_caller_test(rep):
         for first_query_iteration_element in first_query_iteration[num_queries_idx]:
 
             folder = "RESULTS"
-            subfolder = "HOLE_HVI_Bayes_Assum_Tche_U_Tche_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
+            subfolder = "NO_HOLE_weighted_HVI_Bayes_Assum_Tche_U_Tche_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
             cwd = os.getcwd()
             path = cwd + "/" + folder + "/"+subfolder
 
             # include function
-            func= HOLE(sd=np.sqrt(noise))
+            func= NO_HOLE(sd=np.sqrt(noise))
 
             # --- Attributes
             #repeat same objective function to solve a 1 objective problem
@@ -100,11 +100,11 @@ def Bayes_HVI_HOLE_Lin_function_caller_test(rep):
                                                                       seed=rep,
                                                                       utility=u_funcs_true)
 
-            true_dm_utility_function = InteractionwithDecisionMakerClass.get_true_utility_values()
-            true_dm_utility_parameters = InteractionwithDecisionMakerClass.get_true_parameters()
-
-            HVI_acq.include_true_dm_utility_vals(true_dm_utility_function)
-            HVI_acq.include_true_dm_utility_parameters(true_dm_utility_parameters)
+            # true_dm_utility_function = InteractionwithDecisionMakerClass.get_true_utility_values()
+            # true_dm_utility_parameters = InteractionwithDecisionMakerClass.get_true_parameters()
+            #
+            # HVI_acq.include_true_dm_utility_vals(true_dm_utility_function)
+            # HVI_acq.include_true_dm_utility_parameters(true_dm_utility_parameters)
 
             evaluator = GPyOpt.core.evaluators.Sequential(HVI_acq)
 

@@ -54,6 +54,7 @@ class Inference_method():
             self.tdim = np.sum([u.n_params for u in u_funcs])
             self.m_dim = self.tdim + self.wdim
 
+        self.recalculation_counter_X_values = 0
         self.posterior_samples = None
         self.Pareto_front  = None
         self.preferred_points = None
@@ -175,6 +176,7 @@ class Inference_method():
             total_generated_samples+=1
 
             if total_generated_samples> sampling_limit:
+                print("sampling limit reached....")
                 break
 
             candidate_sample = self.prior_sampler(n_samples=1, seed=None)
@@ -198,12 +200,16 @@ class Inference_method():
         removed_samples_t = []
         for st in samples_t:
 
-            non_zero_idx = np.sum(st[warmup:], axis=1)
-            removed_samples_t.append(st[warmup:][non_zero_idx==1.])
+            non_zero_idx = np.sum(st[warmup:], axis=1) != 0
+            # print("before",st[warmup:].shape)
+            removed_samples_t.append(st[warmup:][non_zero_idx, :])
+        #     print("filtering", len(non_zero_idx))
+        #     print("after", st[warmup:][non_zero_idx].shape)
+        #
+        # print("non_zero_idx",non_zero_idx, len(non_zero_idx))
+        self.posterior_samples = removed_samples_t, samples_w[warmup:][non_zero_idx]
 
-        self.posterior_samples = removed_samples_t, samples_w[warmup:][non_zero_idx==1.]
-
-        return removed_samples_t, samples_w[warmup:][non_zero_idx==1.]
+        return removed_samples_t, samples_w[warmup:][non_zero_idx]
 
     def get_generated_posterior_samples(self):
         return self.posterior_samples
@@ -303,7 +309,7 @@ class Inference_method():
 
         return expected_likelihood
 
-    def Expected_Utility(self, preferred_point, posterior_samples=None):
+    def Expected_Utility(self, preferred_point, sampled_Y_vals, posterior_samples=None):
 
         if posterior_samples is None:
             posterior_theta, posterior_weights = self.posterior_sampler(n_samples=50,
@@ -313,15 +319,35 @@ class Inference_method():
 
         preferred_point = np.atleast_2d(preferred_point)
         predictive_lik = np.zeros((preferred_point.shape[0],))
+
+        if self.recalculation_counter_X_values != len(sampled_Y_vals):
+            Sampled_utility_values = []
+            for spoint_idx in range(len(sampled_Y_vals)):
+                Sampled_utility_values.append(self.u_function(y=sampled_Y_vals[spoint_idx],
+                                            weights=posterior_weights,
+                                            parameters=posterior_theta).reshape(-1))
+            self.Sampled_utility_values = Sampled_utility_values
+            self.recalculation_counter_X_values = len(sampled_Y_vals)
+        # print(np.array(Sampled_utility_values).shape)
+        marginal_best_utility = np.max(self.Sampled_utility_values, axis=0)
+        # print("marginal_best_utility",marginal_best_utility.shape)
+
         for l in range(len(preferred_point)):
             u_best = self.u_function(y=preferred_point[l],
                                      weights=posterior_weights,
                                      parameters=posterior_theta).reshape(-1)
 
-            likelihood_v2 = u_best
+            # print("posterior_theta",np.array(posterior_theta).shape)
+            # print("u_best", u_best.shape)
+            Improvement = u_best - marginal_best_utility
+            Improvement[Improvement < 0] = 0
+
+            likelihood_v2 = Improvement
 
             predictive_lik[l] = np.mean(likelihood_v2)
 
         return predictive_lik
+
+
 
 

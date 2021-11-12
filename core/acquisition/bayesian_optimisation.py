@@ -290,7 +290,7 @@ class BO(object):
     def verbosity_plot_2D_unconstrained(self):
         ####plots
         print("generating plots")
-        design_plot = initial_design('random', self.space, 10000)
+        design_plot = initial_design('random', self.space, 1000)
 
         # precision = []
         # for i in range(20):
@@ -346,15 +346,15 @@ class BO(object):
         # axs[0, 1].scatter(true_best_y[ 0], true_best_y[1], color="red")
         axs[0, 1].legend()
 
-        posterior_samples = self.acquisition.get_posterior_samples()
-        print("self.suggested_sample",self.suggested_sample)
-        axs[1, 0].set_title("posterior samples $\Theta_{1}$")
-        axs[1, 0].hist(posterior_samples[0][0][:,0])
-        axs[1, 0].set_xlim([0, 1])
-
-        axs[1, 1].set_title("posterior samples $\Theta_{2}$")
-        axs[1, 1].hist(posterior_samples[0][0][:,1])
-        axs[1, 1].set_xlim([0, 1])
+        # posterior_samples = self.acquisition.get_posterior_samples()
+        # print("self.suggested_sample",self.suggested_sample)
+        # axs[1, 0].set_title("posterior samples $\Theta_{1}$")
+        # axs[1, 0].hist(posterior_samples[0][0][:,0])
+        # axs[1, 0].set_xlim([0, 1])
+        #
+        # axs[1, 1].set_title("posterior samples $\Theta_{2}$")
+        # axs[1, 1].hist(posterior_samples[0][0][:,1])
+        # axs[1, 1].set_xlim([0, 1])
         # axs[1, 1].set_title("acq(X)")
         # axs[1, 1].scatter(design_plot[:,0], design_plot[:,1], c= np.array(HVI).reshape(-1))
         # axs[1,1].scatter(self.suggested_sample[:,0],self.suggested_sample[:,1] , color="magenta")

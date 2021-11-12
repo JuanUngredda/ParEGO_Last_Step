@@ -57,44 +57,63 @@ class HVI(AcquisitionBase):
     def get_posterior_samples(self):
         # posterior_samples = self.Inference_Object.get_generated_posterior_samples()
         # if posterior_samples is None:
+        # print("self.n_samples", self.n_samples)
+
         posterior_samples = self.Inference_Object.posterior_sampler(self.n_samples)
+
+        if self.n_samples != np.array(posterior_samples[0]).squeeze().shape[0]:
+            print("posterior_samples[0]).shape[0]", np.array(posterior_samples[0]).squeeze(), np.array(posterior_samples[0]).squeeze().shape)
+            print("self.n_samples", self.n_samples)
+            raise
         return posterior_samples
 
     def get_posterior_utility_landscape(self, y):
 
         if self.true_utility_values is None:
 
+            sampled_Y_vals = np.concatenate(self.model.get_Y_values(), axis=1)
+
+            # generated_mu_values = self.generate_mu_values()
+            #
+            # posterior_utility_samples = self.Inference_Object.Expected_Utility(generated_mu_values,
+            #                                                                    sampled_Y_vals=sampled_Y_vals,
+            #                                                                    posterior_samples=self.posterior_samples)
+            #
+            # plt.scatter(generated_mu_values[:, 0], generated_mu_values[:, 1], c=posterior_utility_samples)
+            # plt.scatter(self.model.get_Y_values()[0], self.model.get_Y_values()[1], color="red")
+            # plt.colorbar()
+            # plt.show()
+            # raise
+            # posterior_utility_samples = self.Inference_Object.Expected_Utility(y,
+            #                                                                    sampled_Y_vals=sampled_Y_vals,
+            #                                                                    posterior_samples=self.posterior_samples)
+            # print("y", y)
             posterior_utility_samples = self.Inference_Object.Expected_Utility(y,
+                                                                               sampled_Y_vals=sampled_Y_vals,
                                                                                posterior_samples=self.posterior_samples)
 
-            posterior_reference_utility = self.Inference_Object.Expected_Utility(-np.array(self.ref_point),
-                                                                                 posterior_samples=self.posterior_samples)
 
-            posterior_surface = posterior_utility_samples - posterior_reference_utility
+            # posterior_reference_utility = self.Inference_Object.Expected_Utility(-np.array(self.ref_point),
+            #                                                                      posterior_samples=self.posterior_samples)
 
+            posterior_surface = posterior_utility_samples #- posterior_reference_utility
 
-            # Y = self.model.get_Y_values()
-            # Y = np.concatenate(Y, axis=1)
-            #
-            #
-            #
-            # posterior_utility_samples = self.Inference_Object.Expected_likelihood(y,
-            #                                                                       sampled_pareto_front=Y,
-            #                                                                       posterior_samples=self.posterior_samples)
 
         else:
 
-
+            sampled_Y_vals = np.concatenate(self.model.get_Y_values(), axis=1)
             posterior_utility_samples = self.Inference_Object.Expected_Utility(y,
-                                                                              posterior_samples=self.true_utility_parameters)
+                                                                               sampled_Y_vals=sampled_Y_vals,
+                                                                               posterior_samples=self.true_utility_parameters)
+            # posterior_utility_samples = self.Inference_Object.Expected_Utility(y,
+            #                                                                    sampled_Y_vals=sampled_Y_vals,
+            #                                                                   posterior_samples=self.true_utility_parameters)
 
-            posterior_reference_utility = self.Inference_Object.Expected_Utility(-np.array(self.ref_point),
-                                                                              posterior_samples=self.true_utility_parameters)
+            # posterior_reference_utility = self.Inference_Object.Expected_Utility(-np.array(self.ref_point),
+            #                                                                   posterior_samples=self.true_utility_parameters)
 
-            posterior_surface = posterior_utility_samples - posterior_reference_utility
-            # posterior_utility_samples = self.Inference_Object.Expected_likelihood(y,
-            #                                                                       sampled_pareto_front=Y,
-            #                                                                       posterior_samples=self.true_utility_parameters)
+            posterior_surface = posterior_utility_samples #- posterior_reference_utility
+
 
         return posterior_surface #posterior_utility_samples
 
@@ -133,18 +152,20 @@ class HVI(AcquisitionBase):
             # self.PF, self.PF_Xvals = self.Generate_Pareto_Front()  # generate pareto front
             print("current dm points", current_number_dm_points)
 
-            if True:
-                mu_vals = self.generate_mu_values()
-                print(mu_vals)
-                uvals = []
-                for m in mu_vals:
-                    uvals.append(self.get_posterior_utility_landscape(m))
-
-                # plt.scatter(mu_vals[:,0], mu_vals[:,1], c=np.array(uvals).reshape(-1))
-                # plt.show()
+            # if True:
+            #     mu_vals = self.generate_mu_values()
+            #     print(mu_vals)
+            #     uvals = []
+            #     for m in mu_vals:
+            #         uvals.append(self.get_posterior_utility_landscape(m))
+            #
+            #     # plt.scatter(mu_vals[:,0], mu_vals[:,1], c=np.array(uvals).reshape(-1))
+            #     # plt.show()
 
             if not self.old_number_of_dm_samples== current_number_dm_points:
                 self.posterior_samples = self.get_posterior_samples()
+                self.old_number_of_dm_samples = current_number_dm_points
+                print("self.posterior_samples",np.array(self.posterior_samples[0]).shape)
 
 
         HVI = self.compute_HVI_LCB(X).reshape(-1)
@@ -214,7 +235,7 @@ class HVI(AcquisitionBase):
         newy = np.array(newy).reshape(-1)
         utility_vector = []
 
-        if True: #self.verbose:
+        if self.verbose:
             P = self.model.get_Y_values()
 
             # non_dominated_vectors = np.array(non_dominated_vectors).squeeze()
@@ -291,15 +312,6 @@ class HVI(AcquisitionBase):
         # print("-self.PF",-self.PF)
         # non_dominated_surface = np.concatenate((non_dominated_surface, -self.PF))
 
-        # if self.verbose:
-        #     plot_P_cur = np.array(P_cur)
-        #     plt.scatter(plot_P_cur[:,0], plot_P_cur[:,1])
-        #     non_dominated_surface = non_dominated_surface.squeeze()
-        #     plt.scatter(non_dominated_surface[:,0],non_dominated_surface[:,1], color="red" )
-        #
-        #     mu_recommended = -self.model.posterior_mean(X)
-        #     plt.scatter(mu_recommended[0], mu_recommended[1],color="magenta")
-        #     plt.show()
 
         HVvals = np.zeros(X.shape[0])
 
