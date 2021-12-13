@@ -19,8 +19,11 @@ from experiment_NO_HOLE_BayesInference_MM import NO_HOLE_function_Lin_caller_tes
 #
 # see fork0_to_csc.py for further help.
 
-from experiment_HOLE_HVI_Bayes_Tche import Bayes_HVI_HOLE_Tche_function_caller_test
-from experiment_NO_HOLE_HVI_Bayes_Tche import Bayes_HVI_NO_HOLE_Tche_function_caller_test
+# from experiment_HOLE_HVI_Bayes_Tche import Bayes_HVI_HOLE_Tche_function_caller_test
+# from experiment_NO_HOLE_HVI_Bayes_Tche import Bayes_HVI_NO_HOLE_Tche_function_caller_test
+
+from experiment_HOLE_HVI_Bayes_Tche_optimistic_front import Bayes_HVI_HOLE_Tche_function_caller_test
+from experiment_NO_HOLE_HVI_Bayes_Tche_optimistic_front import Bayes_HVI_NO_HOLE_Tche_function_caller_test
 
 def run(args):
     """

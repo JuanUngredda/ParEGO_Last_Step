@@ -8,7 +8,7 @@ from .utilities import composed_utility_functions
 
 class ParetoFrontGeneration():
 
-    def __init__(self, model, space, seed, utility):
+    def __init__(self, model, space, seed, utility, show_optimistic_front=False):
 
         #initialising and passing variables
         self.output_dimensions = model.output_dim
@@ -19,6 +19,7 @@ class ParetoFrontGeneration():
         self.DM_utility = composed_utility_functions(utility)
 
         #initialising values
+        self.show_optimistic_front = show_optimistic_front
         self.wdim = len(utility)
         self.tindvdim = [u.n_params for u in utility]
         self.tdim = np.sum([u.n_params for u in utility])
@@ -59,18 +60,21 @@ class ParetoFrontGeneration():
 
         return theta_samples, weight_samples
 
-        return samples
 
     def Generate_Pareto_Front(self):
-        X_train = self.model.get_X_values()
-        GP_y_predictions  = self.mean_prediction_model(X_train ,self.model)
+        # X_train = self.model.get_X_values()
+
+        if self.show_optimistic_front:
+            GP_y_predictions = self.quantile_prediction_model(self.model)
+        else:
+            GP_y_predictions  = self.mean_prediction_model(self.model)
 
 
         bounds = self.space.get_continuous_bounds()
         bounds = self.bounds_format_adapter(bounds)
         udp = GA(f=GP_y_predictions, bounds=bounds, n_obj=self.output_dimensions)
-        pop = population(prob=udp, size=100)
-        algo = algorithm(nsga2(gen=300))
+        pop = population(prob=udp, size=100)#100
+        algo = algorithm(nsga2(gen=300))#300
         pop = algo.evolve(pop)
         fits, vectors = pop.get_f(), pop.get_x()
         ndf, dl, dc, ndr = fast_non_dominated_sorting(fits)
@@ -86,13 +90,26 @@ class ParetoFrontGeneration():
             bounds_correct_format.append(list(bounds[:, b]))
         return bounds_correct_format
 
-    def mean_prediction_model(self, X, model):
+    def mean_prediction_model(self, model):
         def prediction(X):
             X = np.atleast_2d(X)
 
             mu_x = model.posterior_mean(X)
             mu_x = np.vstack(mu_x).T
             return mu_x
+        return prediction
+
+    def quantile_prediction_model(self, model):
+        def prediction(X):
+            X = np.atleast_2d(X)
+            mu_x = model.posterior_mean(X)
+            mu_x = np.vstack(mu_x).T
+
+            var_x = model.posterior_variance(X, noise=False)
+            var_x = np.vstack(var_x).T
+            sqrt = np.sqrt(var_x)
+
+            return mu_x + 1.96 * sqrt
         return prediction
 
     def ShowParetoFronttotheDecisionMaker(self):

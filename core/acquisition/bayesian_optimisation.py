@@ -172,18 +172,6 @@ class BO(object):
             print("maKG optimizer")
             start = time.time()
 
-            # true_best_x, true_best_val = self.compute_underlying_best()
-            #
-            # design_plot = initial_design('random', self.space, 10000)
-            #
-            # func_val, _ = self.objective.evaluate(design_plot)
-            # func_val_recommended ,_= self.objective.evaluate(true_best_x)
-            # print(func_val_recommended)
-            # plt.scatter(func_val[0], func_val[1])
-            # plt.scatter(func_val_recommended [0], func_val_recommended [1])
-            # plt.show()
-            # print(true_best_val)
-            # raise
             if (self.DecisionMakerInteractor is not None) \
                     and (self.num_acquisitions in query_schedule):
 
@@ -313,6 +301,9 @@ class BO(object):
 
         HVI = self.acquisition._compute_acq(design_plot)
 
+        weighted_surface = np.zeros(len(HVI))
+        for idx, fval in enumerate(func_val):
+            weighted_surface[idx] = self.acquisition.get_posterior_utility_landscape(fval)
         # weighted_surface = self.acquisition.weighting_surface(design_plot)
         # true_underlying_utility = self.get_true_utility_function()
         # true_parameters = self.get_true_parameters()
@@ -321,6 +312,17 @@ class BO(object):
         #                                            weights=true_parameters[1],
         #                                            parameters=true_parameters[0])
         fig, axs = plt.subplots(2, 2)
+
+        optimistic_PF = self.acquisition.Inference_Object.Pareto_front
+        preferred_point = self.acquisition.Inference_Object.preferred_points
+
+        mean_PF = self.acquisition.PF_mean_front
+        axs[1, 0].set_title('weighted landscape Function')
+        axs[1, 0].scatter(func_val[:, 0], func_val[:, 1], c=np.array(weighted_surface).reshape(-1) )
+        axs[1, 0].scatter(optimistic_PF[0][:, 0], optimistic_PF[0][:, 1], color="blue")
+        axs[1, 0].scatter(optimistic_PF[0][preferred_point, 0], optimistic_PF[0][preferred_point, 1], color="black")
+        axs[1, 0].scatter(mean_PF[:, 0], mean_PF[:, 1], color="red")
+
         axs[0, 0].set_title('True PF Function')
         axs[0, 0].scatter(func_val[:, 0], func_val[:, 1])#, c=np.array(true_utility_values).reshape(-1) )
 
