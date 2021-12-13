@@ -24,7 +24,24 @@ class ParetoFrontGeneration():
         self.tindvdim = [u.n_params for u in utility]
         self.tdim = np.sum([u.n_params for u in utility])
         self.m_dim = self.tdim + self.wdim
-        self.weight = self.prior_sampler(n_samples=1, seed=seed)#([np.array([[0., 1]])], np.array([[1.]]))#
+
+        self.weight = self.prior_sampler(n_samples=1, seed=seed)  # ([np.array([[0., 1]])], np.array([[1.]]))#
+
+        self.concatenated_best_weight = np.concatenate([np.array(self.weight[0]).reshape(-1), np.array(self.weight[1]).reshape(-1)])
+
+        n_scalars = 100
+        self.whole_prior_parameters, self.whole_prior_weights = self.prior_sampler(n_samples=n_scalars, seed=seed)
+        self.concatenated_parameters = np.hstack(self.whole_prior_parameters)
+        self.concatenated_total_parameters = np.hstack([self.concatenated_parameters, self.whole_prior_weights])
+
+        distance = np.sqrt(np.sum(np.square(self.concatenated_best_weight  - self.concatenated_total_parameters),axis=1))
+        sorted_dst_idx = np.argsort(distance)
+        self.k_scalars = int(n_scalars * 0.30)
+        scalars_k_min_distance = sorted_dst_idx[:self.k_scalars]
+
+        self.subset_prior_params = [p[scalars_k_min_distance] for p in self.whole_prior_parameters]
+        self.subset_prior_weights = self.whole_prior_weights[scalars_k_min_distance]
+
         print("weight", self.weight)
 
     def get_true_parameters(self):
@@ -115,15 +132,33 @@ class ParetoFrontGeneration():
     def ShowParetoFronttotheDecisionMaker(self):
 
         PF, PF_Xvals = self.Generate_Pareto_Front()  # generate pareto front
-        Utility_PF =  self.DM_utility(PF,
-                                      weights=self.weight[1],
-                                      parameters=self.weight[0])  # dm picks a solution
 
-        # solution picked by the dm in output space
-        solution_picked_dm_index = np.argmax(Utility_PF)  # minimise utility
-        solution_x_picked_dm = PF_Xvals[solution_picked_dm_index]
+        solutions_idx = []
+        solutions_x = []
+        for idx in range(self.k_scalars):
 
-        return solution_picked_dm_index, solution_x_picked_dm, PF, Utility_PF
+            param = [p[idx] for p in self.subset_prior_params]
+            # print("param",param)
+            Utility_PF =  self.DM_utility(PF,
+                                          weights=self.subset_prior_weights[idx],
+                                          parameters = param)  # dm picks a solution
+            # print("self.subset_prior_params",self.subset_prior_params)
+            # print("Utility_PF",Utility_PF)
+            # solution picked by the dm in output space
+            solution_picked_dm_index = np.argmax(Utility_PF)  # minimise utility
+            # print("solution_picked_dm_index",solution_picked_dm_index)
+            solution_x_picked_dm = PF_Xvals[solution_picked_dm_index]
+
+            solutions_idx.append(solution_picked_dm_index)
+            solutions_x.append(solution_x_picked_dm)
+            # raise
+        # print(PF[np.array(solutions_idx),0])
+        # print(solutions_idx)
+        # plt.scatter(PF[:,0], PF[:,1], color="blue")
+        # plt.scatter(PF[np.array(solutions_idx),0], PF[np.array(solutions_idx),1], color="black")
+        # plt.show()
+        # raise
+        return np.array(solutions_idx), np.array(solutions_x), PF, Utility_PF
 
 class GA:
     # Define objectives

@@ -301,9 +301,9 @@ class BO(object):
 
         HVI = self.acquisition._compute_acq(design_plot)
 
-        weighted_surface = np.zeros(len(HVI))
-        for idx, fval in enumerate(func_val):
-            weighted_surface[idx] = self.acquisition.get_posterior_utility_landscape(fval)
+        # weighted_surface = np.zeros(len(HVI))
+        # for idx, fval in enumerate(func_val):
+        #     weighted_surface[idx] = self.acquisition.get_posterior_utility_landscape(fval)
         # weighted_surface = self.acquisition.weighting_surface(design_plot)
         # true_underlying_utility = self.get_true_utility_function()
         # true_parameters = self.get_true_parameters()
@@ -313,15 +313,15 @@ class BO(object):
         #                                            parameters=true_parameters[0])
         fig, axs = plt.subplots(2, 2)
 
-        optimistic_PF = self.acquisition.Inference_Object.Pareto_front
-        preferred_point = self.acquisition.Inference_Object.preferred_points
-
-        mean_PF = self.acquisition.PF_mean_front
-        axs[1, 0].set_title('weighted landscape Function')
-        axs[1, 0].scatter(func_val[:, 0], func_val[:, 1], c=np.array(weighted_surface).reshape(-1) )
-        axs[1, 0].scatter(optimistic_PF[0][:, 0], optimistic_PF[0][:, 1], color="blue")
-        axs[1, 0].scatter(optimistic_PF[0][preferred_point, 0], optimistic_PF[0][preferred_point, 1], color="black")
-        axs[1, 0].scatter(mean_PF[:, 0], mean_PF[:, 1], color="red")
+        # optimistic_PF = self.acquisition.Inference_Object.Pareto_front
+        # preferred_point = self.acquisition.Inference_Object.preferred_points
+        #
+        # mean_PF = self.acquisition.PF_mean_front
+        # axs[1, 0].set_title('weighted landscape Function')
+        # axs[1, 0].scatter(func_val[:, 0], func_val[:, 1], c=np.array(weighted_surface).reshape(-1) )
+        # axs[1, 0].scatter(optimistic_PF[0][:, 0], optimistic_PF[0][:, 1], color="blue")
+        # axs[1, 0].scatter(optimistic_PF[0][preferred_point, 0], optimistic_PF[0][preferred_point, 1], color="black")
+        # axs[1, 0].scatter(mean_PF[:, 0], mean_PF[:, 1], color="red")
 
         axs[0, 0].set_title('True PF Function')
         axs[0, 0].scatter(func_val[:, 0], func_val[:, 1])#, c=np.array(true_utility_values).reshape(-1) )
@@ -348,11 +348,11 @@ class BO(object):
         # axs[0, 1].scatter(true_best_y[ 0], true_best_y[1], color="red")
         axs[0, 1].legend()
 
-        # posterior_samples = self.acquisition.get_posterior_samples()
+        posterior_samples = self.acquisition.get_posterior_samples()
         # print("self.suggested_sample",self.suggested_sample)
-        # axs[1, 0].set_title("posterior samples $\Theta_{1}$")
-        # axs[1, 0].hist(posterior_samples[0][0][:,0])
-        # axs[1, 0].set_xlim([0, 1])
+        axs[1, 1].set_title("posterior samples $\Theta_{1}$")
+        axs[1, 1].hist(posterior_samples[0][0][:,0])
+        axs[1, 1].set_xlim([0, 1])
         #
         # axs[1, 1].set_title("posterior samples $\Theta_{2}$")
         # axs[1, 1].hist(posterior_samples[0][0][:,1])

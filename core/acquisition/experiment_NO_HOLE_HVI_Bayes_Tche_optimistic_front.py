@@ -146,5 +146,3 @@ def Bayes_HVI_NO_HOLE_Tche_function_caller_test(rep):
 # for rep in range(10):
 # Bayes_HVI_HOLE_Lin_function_caller_test(2)
 # print("ready")
-
-

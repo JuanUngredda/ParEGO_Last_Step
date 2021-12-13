@@ -156,6 +156,7 @@ class Inference_method():
         return samples
 
     def posterior_sampler(self, n_samples, seed=None, warmup=0, sampling_limit=100000):
+
         # Metropolis-Hasting algorithm. proposal distribution is the dirichlet prior.
         np.random.seed(seed)
         accepted_samples = 0
@@ -228,6 +229,7 @@ class Inference_method():
         log_lik = np.zeros((N, weights.shape[0]))
 
         for n in range(N):
+
             preferred_point = self.Pareto_front[n][self.preferred_points[n]]
 
             u_pf_samples = self.u_function(y=self.Pareto_front[n],
@@ -235,9 +237,10 @@ class Inference_method():
                                            parameters=theta)
 
             simulated_best_index = np.argmax(u_pf_samples)
+
             decision_maker_best_index = self.preferred_points[n]
 
-            if simulated_best_index==decision_maker_best_index:
+            if simulated_best_index in decision_maker_best_index:
                 likelihood = 1
             else:
                 likelihood = 0
