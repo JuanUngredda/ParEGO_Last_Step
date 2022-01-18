@@ -20,9 +20,8 @@ def Bayes_HVI_HOLE_Tche_function_caller_test(rep):
     np.random.seed(rep)
 
 
-    max_number_DMqueries = [0,1]
-    first_query_iteration = [[0],
-                             [0, 1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 99]]
+    max_number_DMqueries = [1]
+    first_query_iteration = [[0, 1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 99]]
 
     for num_queries_idx in range(len(max_number_DMqueries)):
 
@@ -34,7 +33,7 @@ def Bayes_HVI_HOLE_Tche_function_caller_test(rep):
             path = cwd + "/" + folder + "/"+subfolder
 
             # include function
-            func= HOLE(sd=np.sqrt(noise))
+            func= NO_HOLE(sd=np.sqrt(noise))
 
             # --- Attributes
             #repeat same objective function to solve a 1 objective problem
@@ -65,7 +64,7 @@ def Bayes_HVI_HOLE_Tche_function_caller_test(rep):
             # --- Initial design
             #initial design
             initial_design = GPyOpt.experiment_design.initial_design('latin',
-                                                                     space, 2*(input_d+1))
+                                                                     space, 15)#2*(input_d+1))
 
 
             # --- Bayesian Inference Object on the Utility
@@ -141,6 +140,7 @@ def Bayes_HVI_HOLE_Tche_function_caller_test(rep):
 
         print("X",X,"Y",Y)
 
+Bayes_HVI_HOLE_Tche_function_caller_test(rep=3)
 # for rep in range(10):
 # Bayes_HVI_HOLE_Tche_function_caller_test(3)
 # for rep in range(10):

@@ -25,9 +25,11 @@ from experiment_NO_HOLE_BayesInference_MM import NO_HOLE_function_Lin_caller_tes
 # from experiment_HOLE_HVI_Bayes_Tche_optimistic_front import Bayes_HVI_HOLE_Tche_function_caller_test
 # from experiment_NO_HOLE_HVI_Bayes_Tche_optimistic_front import Bayes_HVI_NO_HOLE_Tche_function_caller_test
 
-from experiment_HOLE_BayesInference_decision_maker_picks_region import HOLE_function_caller_test
-from experiment_NO_HOLE_BayesInference_decision_maker_picks_region import NO_HOLE_function_caller_test
+# from experiment_HOLE_BayesInference_decision_maker_picks_region import HOLE_function_caller_test
+# from experiment_NO_HOLE_BayesInference_decision_maker_picks_region import NO_HOLE_function_caller_test
 
+from experiment_HOLE_BayesInference_MM import HOLE_function_Lin_caller_test as f1
+from experiment_NO_HOLE_BayesInference_MM import NO_HOLE_function_Lin_caller_test as f2
 def run(args):
     """
     This is a stupid function just for demonstration purposes.
@@ -55,8 +57,8 @@ def run(args):
     # IMPORT AND RUN MODULES
     #functions = [function_caller_new_brannin_TS, function_caller_test_func_2_TS, function_caller_mistery_TS, function_caller_RMITD_TS, function_caller_RMITD_EI, function_caller_RMITD]
     #functions = [function_caller_RMITD ]
-    functions = [HOLE_function_caller_test,
-                 NO_HOLE_function_caller_test]
+    functions = [f1,
+                 f2]
 
     for func in functions:
         func(args.k)

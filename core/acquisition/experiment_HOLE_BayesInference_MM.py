@@ -76,11 +76,11 @@ def HOLE_function_Lin_caller_test(rep):
             Tche_u = Tchevichev_utility_func(n_params=n_f)
             Lin_u = Linear_utility_func(n_params=n_f)
 
-            assumed_u_funcs = [[Tche_u] , [Lin_u]]
-            names = [ "Tche", "Lin"]
+            assumed_u_funcs = [Tche_u]
+            names = [ "Tche"]
             BayesInferenceUtility = Inference_method(u_funcs=assumed_u_funcs,
                                                      names=names,
-                                                     Dynamic_Utility_Selection=True)
+                                                     Dynamic_Utility_Selection=False)
 
             # #Utility of the decision maker
             # Lin_u = Linear_utility_func(n_params=n_f)
@@ -139,7 +139,6 @@ def HOLE_function_Lin_caller_test(rep):
                                                              )
 
         print("Code Ended")
-
         print("X",X,"Y",Y)
 
 # HOLE_function_Lin_caller_test(rep=5)

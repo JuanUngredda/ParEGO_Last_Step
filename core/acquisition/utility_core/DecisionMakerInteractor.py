@@ -42,6 +42,10 @@ class ParetoFrontGeneration():
         self.subset_prior_params = [p[scalars_k_min_distance] for p in self.whole_prior_parameters]
         self.subset_prior_weights = self.whole_prior_weights[scalars_k_min_distance]
 
+        if show_optimistic_front:
+            self.k_scalars = 1
+            self.subset_prior_params = self.weight[0]
+            self.subset_prior_weights = self.weight[1]
         print("weight", self.weight)
 
     def get_true_parameters(self):
@@ -82,6 +86,7 @@ class ParetoFrontGeneration():
         # X_train = self.model.get_X_values()
 
         if self.show_optimistic_front:
+
             GP_y_predictions = self.quantile_prediction_model(self.model)
         else:
             GP_y_predictions  = self.mean_prediction_model(self.model)
@@ -154,8 +159,13 @@ class ParetoFrontGeneration():
             # raise
         # print(PF[np.array(solutions_idx),0])
         # print(solutions_idx)
-        # plt.scatter(PF[:,0], PF[:,1], color="blue")
-        # plt.scatter(PF[np.array(solutions_idx),0], PF[np.array(solutions_idx),1], color="black")
+        # plt.scatter(-PF[:,0], -PF[:,1], color="magenta", label="mean Pareto front")
+        # plt.scatter(-PF[np.array(solutions_idx),0], -PF[np.array(solutions_idx),1], color="black", label="DM picks")
+        # plt.xlim((0, 3.0))
+        # plt.ylim((0, 4.0))
+        # plt.xlabel("$\min f1$", size=15)
+        # plt.ylabel("$\min f2$", size=15)
+        # plt.legend()
         # plt.show()
         # raise
         return np.array(solutions_idx), np.array(solutions_x), PF, Utility_PF

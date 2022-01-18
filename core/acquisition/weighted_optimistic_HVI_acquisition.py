@@ -91,15 +91,17 @@ class HVI(AcquisitionBase):
             self.weighted_surface = self.build_weighted_landscape()
             self.flag_generate_landscape = False
 
-        # y_vals = np.random.random((1000,2))*(np.array([0.3, 0.1]) - np.array([-3.5,-3.0])) + np.array([-3.5,-3.0])
-        # utility_vals = np.zeros(y_vals.shape[0])
-        posterior_surface = self.weighted_surface(y)
-        # for idx, yval in enumerate(y_vals):
-        #     utility_vals[idx] = weighted_surface(yval)
+        y_vals = np.random.random((1000,2))*(np.array([0.3, 0.1]) - np.array([-3.5,-3.0])) + np.array([-3.5,-3.0])
+        utility_vals = np.zeros(y_vals.shape[0])
+        # posterior_surface = self.weighted_surface(y)
+        for idx, yval in enumerate(y_vals):
+            utility_vals[idx] = self.weighted_surface(yval)
 
-        # plt.scatter(y_vals[:,0], y_vals[:,1], c=utility_vals)
-        # plt.show()
-        # raise
+        plt.scatter(-y_vals[:,0], -y_vals[:,1], c=utility_vals, zorder=-5)
+        plt.xlim(( 0, 3.0))
+        plt.ylim((0, 3.0))
+        plt.show()
+        raise
         return np.atleast_1d(posterior_surface) #posterior_utility_samples
 
     def build_weighted_landscape(self):
@@ -148,13 +150,18 @@ class HVI(AcquisitionBase):
         # print("best_current_mean_value",best_current_mean_value)
         # print("PF_mean_front",PF_mean_front)
 
-        # plt.scatter(optimistic_front[:,0], optimistic_front[:,1])
-        # plt.scatter(optimistic_front[preferred_solution,0], optimistic_front[preferred_solution,1], color="red")
-        # plt.scatter(PF_mean_front[:,0], PF_mean_front[:,1], color="magenta")
-        # plt.scatter(PF_mean_front[best_utility_idx,0], PF_mean_front[best_utility_idx,1], color="black")
+        plt.scatter(-optimistic_front[:,0], -optimistic_front[:,1], label="optimistic front", zorder=-2)
+        plt.scatter(-optimistic_front[preferred_solution,0], -optimistic_front[preferred_solution,1], color="red", label="DM pick", zorder=-1)
+        plt.scatter(-PF_mean_front[:,0], -PF_mean_front[:,1], color="magenta", label="mean front", zorder=-2)
+        plt.scatter(-PF_mean_front[best_utility_idx,0], -PF_mean_front[best_utility_idx,1], color="black", zorder=-1)
+        plt.ylabel("$\min f_{2}$", size=15)
+        plt.xlabel("$\min f_{1}$", size=15)
+        plt.xlim(( 0, 3.0))
+        plt.ylim((0, 4))
+        plt.legend()
         # plt.show()
-        # print("PF", PF)
-        # print("preferred_solution",preferred_solution)
+        # # print("PF", PF)
+        # # print("preferred_solution",preferred_solution)
         # raise
         return surface
 
@@ -307,6 +314,7 @@ class HVI(AcquisitionBase):
             plt.xlabel("$y_{1}$")
             plt.title("objective space (maximisation)")
             plt.legend()
+
             plt.show()
 
         else:
