@@ -27,7 +27,7 @@ def perfect_information_EI_UU_HOLE_function_caller_test(rep):
         for first_query_iteration_element in first_query_iteration[num_queries_idx]:
 
             folder = "RESULTS"
-            subfolder = "HOLE_PI_EI_UU_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
+            subfolder = "HOLE_PI_EI_UU_SLS_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
             cwd = os.getcwd()
             path = cwd + "/" + folder + "/"+subfolder
 
@@ -81,6 +81,7 @@ def perfect_information_EI_UU_HOLE_function_caller_test(rep):
 
             # --- Utility function
             EI_UU = ExpectedImprovementUtilityUncertaintywithPointUtility(model=model_f,
+                                                                          first_DM_query=first_query_iteration_element,
                                                           space=space,
                                                           optimizer = acq_opt,
                                                           Inference_Object=BayesInferenceUtility)
@@ -135,7 +136,7 @@ def perfect_information_EI_UU_HOLE_function_caller_test(rep):
 
 
 # for rep in range(10):
-# point_estimation_NO_HOLE_function_caller_test(1)
+# perfect_information_EI_UU_HOLE_function_caller_test(1)
 # for rep in range(10):
 # point_estimation_NO_HOLE_function_caller_test(1)
 # print("ready")

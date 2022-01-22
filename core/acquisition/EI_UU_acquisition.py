@@ -50,6 +50,8 @@ class ExpectedImprovementUtilityUncertainty(AcquisitionBase):
             print('LBC acquisition does now make sense with cost. Cost set to constant.')
             self.cost_withGradients = constant_cost_withGradients
 
+        self.utility = self.Inference_Object.get_utility_function()
+
     def include_fantasised_posterior_samples(self, posterior_samples):
         self.fantasised_posterior_samples = posterior_samples
 

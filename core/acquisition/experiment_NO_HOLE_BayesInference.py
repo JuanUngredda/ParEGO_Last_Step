@@ -28,7 +28,7 @@ def NO_HOLE_function_caller_test(rep):
         for first_query_iteration_element in first_query_iteration[num_queries_idx]:
 
             folder = "RESULTS"
-            subfolder = "NO_HOLE_Bayes_Assum_Lin_U_Lin_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
+            subfolder = "NO_HOLE_Bayes_Assum_Lin_U_Lin_SLS_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
             cwd = os.getcwd()
             path = cwd + "/" + folder + "/"+subfolder
 
@@ -74,7 +74,7 @@ def NO_HOLE_function_caller_test(rep):
             Tche_u = Tchevichev_utility_func(n_params=n_f)
             Lin_u = Linear_utility_func(n_params=n_f)
 
-            assumed_u_funcs = [Lin_u]
+            assumed_u_funcs = [Tche_u]
             BayesInferenceUtility = Inference_method(assumed_u_funcs)
 
             # #Utility of the decision maker
@@ -92,7 +92,7 @@ def NO_HOLE_function_caller_test(rep):
 
             #utility functions assumed for the decision maker
 
-            u_funcs_true = [Lin_u]
+            u_funcs_true = [Tche_u]
             InteractionwithDecisionMakerClass = ParetoFrontGeneration(model=model_f,
                                                                       space=space,
                                                                       seed=rep,

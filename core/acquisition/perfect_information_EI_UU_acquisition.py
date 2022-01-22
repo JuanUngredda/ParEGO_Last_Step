@@ -18,7 +18,7 @@ class ExpectedImprovementUtilityUncertaintywithPointUtility(AcquisitionBase):
 
     analytical_gradient_prediction = False
 
-    def __init__(self, model, space, optimizer=None, cost_withGradients=None, Inference_Object=None):
+    def __init__(self, model, space, optimizer=None, first_DM_query=0, cost_withGradients=None, Inference_Object=None):
 
         #get needed functions
         self.optimizer = optimizer
@@ -43,6 +43,9 @@ class ExpectedImprovementUtilityUncertaintywithPointUtility(AcquisitionBase):
             print('LBC acquisition does now make sense with cost. Cost set to constant.')
             self.cost_withGradients = constant_cost_withGradients
 
+        self.first_DM_query = first_DM_query
+        self.utility = self.Inference_Object.get_utility_function()
+
     def include_true_dm_utility_vals(self, utility):
         self.true_utility_values = utility
 
@@ -55,7 +58,15 @@ class ExpectedImprovementUtilityUncertaintywithPointUtility(AcquisitionBase):
     def get_posterior_samples(self):
         # posterior_samples = self.Inference_Object.get_generated_posterior_samples()
 
-        posterior_samples = self.true_utility_parameters
+        # print(self.old_number_of_simulation_samples-6)
+        # print(self.first_DM_query)
+        # print(self.old_number_of_simulation_samples-6 > self.first_DM_query)
+        # raise
+        if self.old_number_of_simulation_samples-6 > self.first_DM_query:
+            posterior_samples = self.true_utility_parameters
+        else:
+            posterior_samples = self.Inference_Object.posterior_sampler(self.n_samples)
+
         return posterior_samples
 
     def _compute_acq(self, X, parallel=True):

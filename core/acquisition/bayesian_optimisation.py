@@ -418,10 +418,13 @@ class BO(object):
             Y_train = self.model.get_Y_values()
             Y_train = np.concatenate(Y_train, axis=1)
 
-
-            uval_sampled = np.max(true_underlying_utility(y=Y_train,
-                                                           weights=true_parameters[1],
-                                                           parameters=true_parameters[0]))
+            expected_utility = self.compute_expected_utility()
+            recommended_Y = Y_train[np.argmax(expected_utility)]
+            uval_sampled = true_underlying_utility(y=recommended_Y,
+                                                   weights=true_parameters[1],
+                                                   parameters=true_parameters[0])
+            # print(uval_sampled)
+            # raise
 
             N_entries = len(self.data["Utility"].reshape(-1))
             true_best_x, true_best_val = self.compute_underlying_best()
@@ -447,6 +450,28 @@ class BO(object):
             # extra_gen_file.to_csv(path_or_buf=extra_path)
 
         print("path", self.path + "/" + results_folder)
+
+    def compute_expected_utility(self):
+        posterior_samples = self.acquisition.get_posterior_samples()
+        utility_parameters = posterior_samples[0]
+        linear_weight_combination = posterior_samples[1]
+        utility = self.acquisition.Inference_Object.get_utility_function()
+        Y_train = self.model.get_Y_values()
+        Y_train = np.concatenate(Y_train, axis=1)
+        Utility = self.acquisition.utility(y=Y_train,
+                                          weights=linear_weight_combination,
+                                          parameters=utility_parameters,
+                                          vectorised=True)
+
+        expected_utility = np.mean(Utility, axis=0)
+        # plt.scatter(Y_train[:,0], Y_train[:,1], c=expected_utility.reshape(-1))
+        # plt.show()
+        # print(expected_utility.shape)
+        # print(Y_train.shape)
+        # print(utility_parameters)
+        # print(Utility.shape)
+        # raise
+        return expected_utility
 
     def get_true_utility_function(self):
         return self.DecisionMakerInteractor.get_true_utility_function()

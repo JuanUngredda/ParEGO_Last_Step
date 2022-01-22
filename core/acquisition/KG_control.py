@@ -5,8 +5,8 @@ import os
 import argparse
 
 
-from experiment_HOLE_BayesInference_MM import HOLE_function_Lin_caller_test
-from experiment_NO_HOLE_BayesInference_MM import NO_HOLE_function_Lin_caller_test
+# from experiment_HOLE_BayesInference_MM import HOLE_function_Lin_caller_test
+# from experiment_NO_HOLE_BayesInference_MM import NO_HOLE_function_Lin_caller_test
 
 # This is a bare script that receives args, prints something, wastes some time,function_caller_test_func_2_TS
 # and saves something. Use this as a blank template to run experiments.
@@ -28,8 +28,19 @@ from experiment_NO_HOLE_BayesInference_MM import NO_HOLE_function_Lin_caller_tes
 # from experiment_HOLE_BayesInference_decision_maker_picks_region import HOLE_function_caller_test
 # from experiment_NO_HOLE_BayesInference_decision_maker_picks_region import NO_HOLE_function_caller_test
 
-from experiment_HOLE_BayesInference_MM import HOLE_function_Lin_caller_test as f1
-from experiment_NO_HOLE_BayesInference_MM import NO_HOLE_function_Lin_caller_test as f2
+# from experiment_HOLE_BayesInference_MM import HOLE_function_Lin_caller_test as f1
+# from experiment_NO_HOLE_BayesInference_MM import NO_HOLE_function_Lin_caller_test as f2
+
+from experiment_HOLE_HVI_Bayes_Tche import Bayes_HVI_HOLE_Tche_function_caller_test as f1
+from experiment_HOLE_BayesInference_Tche import HOLE_function_Tche_caller_test as f2
+from experiment_HOLE_perfect_information import perfect_information_EI_UU_HOLE_function_caller_test as f3
+from experiment_HOLE_perfect_information_HVI import perfect_information_HVI_HOLE_function_caller_test as f4
+
+from experiment_NO_HOLE_BayesInference import NO_HOLE_function_caller_test as f5
+from experiment_NO_HOLE_HVI_Bayes_Tche import Bayes_HVI_NO_HOLE_Tche_function_caller_test as f6
+from experiment_NO_HOLE_perfect_information import perfect_information_EI_UU_NO_HOLE_function_caller_test as f7
+from experiment_NO_HOLE_perfect_information_HVI import perfect_information_HVI_NO_HOLE_function_caller_test as f8
+
 def run(args):
     """
     This is a stupid function just for demonstration purposes.
@@ -57,8 +68,7 @@ def run(args):
     # IMPORT AND RUN MODULES
     #functions = [function_caller_new_brannin_TS, function_caller_test_func_2_TS, function_caller_mistery_TS, function_caller_RMITD_TS, function_caller_RMITD_EI, function_caller_RMITD]
     #functions = [function_caller_RMITD ]
-    functions = [f1,
-                 f2]
+    functions = [f1,f2,f3,f4,f5,f6,f7,f8]
 
     for func in functions:
         func(args.k)

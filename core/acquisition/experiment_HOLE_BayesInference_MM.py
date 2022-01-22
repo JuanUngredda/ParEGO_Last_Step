@@ -140,6 +140,6 @@ def HOLE_function_Lin_caller_test(rep):
         print("Code Ended")
         print("X",X,"Y",Y)
 
-# HOLE_function_Lin_caller_test(rep=5)
+HOLE_function_Lin_caller_test(rep=5)
 
 

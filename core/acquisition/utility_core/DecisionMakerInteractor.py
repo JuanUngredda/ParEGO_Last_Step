@@ -8,7 +8,7 @@ from .utilities import composed_utility_functions
 
 class ParetoFrontGeneration():
 
-    def __init__(self, model, space, seed, utility, show_optimistic_front=False):
+    def __init__(self, model, space, seed, utility, show_optimistic_front=False, region_selection=False):
 
         #initialising and passing variables
         self.output_dimensions = model.output_dim
@@ -24,8 +24,10 @@ class ParetoFrontGeneration():
         self.tindvdim = [u.n_params for u in utility]
         self.tdim = np.sum([u.n_params for u in utility])
         self.m_dim = self.tdim + self.wdim
+        self.region_selection = region_selection
 
-        self.weight = self.prior_sampler(n_samples=1, seed=seed)  # ([np.array([[0., 1]])], np.array([[1.]]))#
+        np.random.random(seed)
+        self.weight = self.prior_sampler(n_samples=1, seed=seed)  # #
 
         self.concatenated_best_weight = np.concatenate([np.array(self.weight[0]).reshape(-1), np.array(self.weight[1]).reshape(-1)])
 
@@ -36,7 +38,7 @@ class ParetoFrontGeneration():
 
         distance = np.sqrt(np.sum(np.square(self.concatenated_best_weight  - self.concatenated_total_parameters),axis=1))
         sorted_dst_idx = np.argsort(distance)
-        self.k_scalars = int(n_scalars * 0.30)
+        self.k_scalars = int(n_scalars * 0.15)
         scalars_k_min_distance = sorted_dst_idx[:self.k_scalars]
 
         self.subset_prior_params = [p[scalars_k_min_distance] for p in self.whole_prior_parameters]
@@ -46,6 +48,11 @@ class ParetoFrontGeneration():
             self.k_scalars = 1
             self.subset_prior_params = self.weight[0]
             self.subset_prior_weights = self.weight[1]
+
+        if self.region_selection==False:
+            self.true_underlying_weights = self.weight
+            self.k_scalars = 1
+
         print("weight", self.weight)
 
     def get_true_parameters(self):
@@ -140,10 +147,14 @@ class ParetoFrontGeneration():
 
         solutions_idx = []
         solutions_x = []
+
         for idx in range(self.k_scalars):
 
-            param = [p[idx] for p in self.subset_prior_params]
-            # print("param",param)
+            if self.region_selection:
+                param = [p[idx] for p in self.subset_prior_params]
+            else:
+                param = self.true_underlying_weights[0]
+            print("param",param)
             Utility_PF =  self.DM_utility(PF,
                                           weights=self.subset_prior_weights[idx],
                                           parameters = param)  # dm picks a solution
@@ -159,13 +170,19 @@ class ParetoFrontGeneration():
             # raise
         # print(PF[np.array(solutions_idx),0])
         # print(solutions_idx)
-        # plt.scatter(-PF[:,0], -PF[:,1], color="magenta", label="mean Pareto front")
-        # plt.scatter(-PF[np.array(solutions_idx),0], -PF[np.array(solutions_idx),1], color="black", label="DM picks")
-        # plt.xlim((0, 3.0))
-        # plt.ylim((0, 4.0))
-        # plt.xlabel("$\min f1$", size=15)
-        # plt.ylabel("$\min f2$", size=15)
+        # GP_y_predictions = self.mean_prediction_model(self.model)
+        # X_plot = np.random.random((1000000,2))*2 -1
+        # predicted_vals = GP_y_predictions(X_plot)
+
+        # plt.scatter(predicted_vals[:,0], predicted_vals[:,1], color="grey", s=20, label="Objective Surface")
+        # plt.scatter(PF[:,0], PF[:,1], color="white", edgecolors="black", label="Generated Pareto front", s=60)
+        # plt.scatter(PF[np.array(solutions_idx),0], PF[np.array(solutions_idx),1], color="red",edgecolors="black", s=50, label="DM Selection")
+        # plt.xlim((-0.2, 0.7))
+        # plt.ylim((-3, 0.1))
+        # plt.xlabel("$\max$ $f_{1}$", size=15)
+        # plt.ylabel("$\max$ $f_{2}$", size=15)
         # plt.legend()
+        # # plt.savefig("/home/juan/Documents/repos_data/Last_Step_Preference_Learning/saved_plots/DM_data_selection.pdf", bbox_inches="tight")
         # plt.show()
         # raise
         return np.array(solutions_idx), np.array(solutions_x), PF, Utility_PF

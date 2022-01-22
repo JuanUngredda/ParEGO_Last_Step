@@ -29,7 +29,7 @@ def HOLE_function_Tche_caller_test(rep):
         for first_query_iteration_element in first_query_iteration[num_queries_idx]:
 
             folder = "RESULTS"
-            subfolder = "HOLE_Bayes_Assum_Tche_U_Tche_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
+            subfolder = "HOLE_Bayes_Assum_Tche_U_Tche_SLS_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
             cwd = os.getcwd()
             path = cwd + "/" + folder + "/"+subfolder
 
@@ -138,7 +138,7 @@ def HOLE_function_Tche_caller_test(rep):
         print("X",X,"Y",Y)
 
 # for rep in range(10):
-# function_caller_test_function_2_penalty(rep)
+# HOLE_function_Tche_caller_test(3)
 # for rep in range(10):
 # NO_HOLE_function_caller_test(3)
 # print("ready")

@@ -28,7 +28,7 @@ class HVI(AcquisitionBase):
 
     analytical_gradient_prediction = False
 
-    def __init__(self, model, space, alpha=1.95,optimizer=None,ref_point=None,cost_withGradients=None, Inference_Object=None):
+    def __init__(self, model, space, alpha=1.95,optimizer=None,first_DM_query=0,ref_point=None,cost_withGradients=None, Inference_Object=None):
 
         self.MCMC = False
         self.output_dimensions = model.output_dim
@@ -49,7 +49,7 @@ class HVI(AcquisitionBase):
         else:
             print('LBC acquisition does now make sense with cost. Cost set to constant.')
             self.cost_withGradients = constant_cost_withGradients
-
+        self.first_DM_query = first_DM_query
         self.utility = self.Inference_Object.get_utility_function()
 
     def include_fantasised_posterior_samples(self, posterior_samples):
@@ -68,44 +68,30 @@ class HVI(AcquisitionBase):
             raise
         return posterior_samples
 
+    def include_true_dm_utility_parameters(self, parameters):
+        self.true_utility_parameters = parameters
+
+
     def get_posterior_utility_landscape(self, y):
 
-        if self.true_utility_values is None:
+        # if self.true_utility_values is None:
 
-            sampled_Y_vals = np.concatenate(self.model.get_Y_values(), axis=1)
-
-            # generated_mu_values = self.generate_mu_values()
-            #
-            # posterior_utility_samples = self.Inference_Object.Expected_Utility(generated_mu_values,
-            #                                                                    sampled_Y_vals=sampled_Y_vals,
-            #                                                                    posterior_samples=self.posterior_samples)
-            #
-            # plt.scatter(generated_mu_values[:, 0], generated_mu_values[:, 1], c=posterior_utility_samples)
-            # plt.scatter(self.model.get_Y_values()[0], self.model.get_Y_values()[1], color="red")
-            # plt.colorbar()
-            # plt.show()
-            # raise
-            # posterior_utility_samples = self.Inference_Object.Expected_Utility(y,
-            #                                                                    sampled_Y_vals=sampled_Y_vals,
-            #                                                                    posterior_samples=self.posterior_samples)
-            # print("y", y)
-            posterior_utility_samples = self.Inference_Object.Expected_Utility(y,
-                                                                               sampled_Y_vals=sampled_Y_vals,
-                                                                               posterior_samples=self.posterior_samples)
-
-
-            # posterior_reference_utility = self.Inference_Object.Expected_Utility(-np.array(self.ref_point),
-            #                                                                      posterior_samples=self.posterior_samples)
-
-            posterior_surface = posterior_utility_samples #- posterior_reference_utility
-
-
-        else:
+        if self.old_number_of_simulation_samples - 6 > self.first_DM_query:
 
             sampled_Y_vals = np.concatenate(self.model.get_Y_values(), axis=1)
             posterior_utility_samples = self.Inference_Object.Expected_Utility(y,
                                                                                sampled_Y_vals=sampled_Y_vals,
                                                                                posterior_samples=self.true_utility_parameters)
+
+            posterior_surface = posterior_utility_samples #- posterior_reference_utility
+
+        else:
+
+            sampled_Y_vals = np.concatenate(self.model.get_Y_values(), axis=1)
+
+            posterior_utility_samples = self.Inference_Object.Expected_Utility(y,
+                                                                               sampled_Y_vals=sampled_Y_vals,
+                                                                               posterior_samples=self.posterior_samples)
             # posterior_utility_samples = self.Inference_Object.Expected_Utility(y,
             #                                                                    sampled_Y_vals=sampled_Y_vals,
             #                                                                   posterior_samples=self.true_utility_parameters)
