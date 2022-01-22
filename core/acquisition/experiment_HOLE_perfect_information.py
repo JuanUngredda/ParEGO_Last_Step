@@ -16,6 +16,7 @@ from utility_core import *
 def perfect_information_EI_UU_HOLE_function_caller_test(rep):
 
     noise = 1e-6
+    rep = rep + 30
     np.random.seed(rep)
 
 

@@ -15,7 +15,7 @@ from utility_core import *
 
 def HOLE_function_Tche_caller_test(rep):
 
-    rep= rep + 20
+    rep= rep + 30
     noise = 1e-6
     np.random.seed(rep)
 
