@@ -123,9 +123,7 @@ class ExpectedImprovementUtilityUncertainty(AcquisitionBase):
                               parameters=utility_parameters ,
                               vectorised=True)
 
-            # print(max_valX_evaluated.shape)
-            # print(Utility.shape)
-            # raise
+
             Improvement = Utility - max_valX_evaluated
             Improvement[Improvement < 0] = 0.0
 
