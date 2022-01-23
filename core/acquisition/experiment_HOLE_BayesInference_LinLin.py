@@ -15,7 +15,7 @@ from utility_core import *
 
 def HOLE_function_Lin_caller_test(rep):
 
-    rep= rep
+    rep= rep 
     noise = 1e-6
     np.random.seed(rep)
 
@@ -29,7 +29,7 @@ def HOLE_function_Lin_caller_test(rep):
         for first_query_iteration_element in first_query_iteration[num_queries_idx]:
 
             folder = "RESULTS"
-            subfolder = "HOLE_Bayes_Assum_Tche_U_Lin_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
+            subfolder = "HOLE_Bayes_Assum_Lin_U_Lin_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
             cwd = os.getcwd()
             path = cwd + "/" + folder + "/"+subfolder
 
@@ -75,7 +75,7 @@ def HOLE_function_Lin_caller_test(rep):
             Tche_u = Tchevichev_utility_func(n_params=n_f)
             Lin_u = Linear_utility_func(n_params=n_f)
 
-            assumed_u_funcs = [Tche_u]
+            assumed_u_funcs = [Lin_u]
             BayesInferenceUtility = Inference_method(u_funcs=assumed_u_funcs)
 
             # #Utility of the decision maker

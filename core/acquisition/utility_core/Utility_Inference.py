@@ -66,44 +66,46 @@ class Inference_method():
         self.preferred_points = preferred_points
 
         if self.Dynamic_Utility_Selection:
-            Probability_Data = self.BIC_computation(u_funcs=self.u_funcs)
-            print("Probability_Data", Probability_Data)
-            Best_Model = self.u_funcs[np.argmax(Probability_Data)]
-            print("Best Model name", self.names[np.argmax(Probability_Data)])
-            self.u_function = composed_utility_functions(u_funcs=Best_Model)
-            # raise
-            # plt.scatter(Pareto_front[0][:,0], Pareto_front[0][:,1])
-        # plt.scatter(Pareto_front[0][preferred_points,0], Pareto_front[0][preferred_points,1], color="red")
-        # plt.show()
+            if self.Pareto_front is None:
+                self.probability_models = np.ones(len(self.u_funcs))/ np.sum(np.ones(len(self.u_funcs)))
+                self.accepted_parameters = None
+                self.models = [composed_utility_functions(u) for u in self.u_funcs]
+            else:
+                Evidence, accepted_parameters, utilities = self.Evidence_computation(u_funcs=self.u_funcs)
+                self.probability_models = np.array(Evidence)/np.sum(Evidence)
+                self.accepted_parameters = accepted_parameters
+                self.models = utilities
 
-    def BIC_computation(self, u_funcs):
+
+    def Evidence_computation(self, u_funcs):
         Data_Likelihood_list = []
-        Likelihood_list = []
+        Accepted_Parameters = []
+        models = []
         for ufun in u_funcs:
             print(ufun)
             self.u_function = composed_utility_functions(ufun)
-            parameter_samples, weights = self.posterior_sampler(n_samples=20, sampling_limit=1000)
+            parameter_samples, weights = self.prior_sampler(n_samples=10000) #, sampling_limit=1000)
 
-            print("param samples", parameter_samples)
-            if len(np.array(parameter_samples).squeeze())==0:
-                Likelihood = 0
-            else:
+            Likelihood = self.Likelihood(theta=parameter_samples,
+                                         weights=weights)
 
-                expected_parameter = [np.atleast_2d(ps[0]) for ps in parameter_samples]
-                expected_weight = [weights[0]]
+            Accepted_Parameters.append([parameter_samples[0][Likelihood==1]])
+            Evidence = np.mean(Likelihood)
+            Data_Likelihood_list.append(Evidence)
+            models.append(self.u_function)
 
-                Likelihood = self.Likelihood(theta=expected_parameter,
-                                             weights=expected_weight)
-            Num_data = len(self.Pareto_front)
-            parameter_dim = ufun[0].n_params
-            Data_Likelihood = Likelihood * (Num_data)**(-np.abs(parameter_dim)/2.0)
-            Likelihood_list.append(Likelihood)
-            Data_Likelihood_list.append(Data_Likelihood)
-        print("Likelihood list", Likelihood_list)
-        return Data_Likelihood_list
+        return Data_Likelihood_list, Accepted_Parameters, models
 
     def get_Decision_Maker_Data(self):
         return self.Pareto_front, self.preferred_points
+
+    def get_utility_information(self):
+        if self.Pareto_front is None:
+            self.probability_models = np.ones(len(self.u_funcs)) / np.sum(np.ones(len(self.u_funcs)))
+            self.accepted_parameters = None
+            self.models = [composed_utility_functions(u) for u in self.u_funcs]
+
+        return self.probability_models, self.accepted_parameters, self.models
 
     def get_utility_function(self):
         return self.u_function
@@ -228,27 +230,24 @@ class Inference_method():
         weights = np.array(weights)
         log_lik = np.zeros((N, weights.shape[0]))
 
+
         for n in range(N):
 
-            preferred_point = self.Pareto_front[n][self.preferred_points[n]]
-
+            # print("weights", np.array(theta).shape)
             u_pf_samples = self.u_function(y=self.Pareto_front[n],
                                            weights=weights,
                                            parameters=theta)
-
-            simulated_best_index = np.argmax(u_pf_samples)
-
+            # print("u_pf_samples",u_pf_samples.shape)
+            simulated_best_index = np.argmax(u_pf_samples, axis=1)
+            # print("simulated_best_index",simulated_best_index.shape)
             decision_maker_best_index = self.preferred_points[n]
 
-            if simulated_best_index in decision_maker_best_index:
-                likelihood = 1
-            else:
-                likelihood = 0
-
-            log_lik[n, :] = likelihood
+            log_lik[n, :] = simulated_best_index == decision_maker_best_index
 
         Lik_val = np.product(log_lik, axis=0)
 
+        # print(Lik_val)
+        # raise
         return Lik_val
 
 

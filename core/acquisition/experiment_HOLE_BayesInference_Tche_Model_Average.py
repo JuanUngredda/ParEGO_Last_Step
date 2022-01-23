@@ -7,7 +7,7 @@ from ParEGO_acquisition import ParEGO
 from bayesian_optimisation import BO
 import os
 from DecisionMakerLastStepsInteraction import AcquisitionFunctionandDecisionMakerInteraction
-from EI_UU_acquisition import ExpectedImprovementUtilityUncertainty
+from EI_UU_acquisition_MA import ExpectedImprovementUtilityUncertainty
 from utility_core import *
 #ALWAYS check cost in
 # --- Function to optimize
@@ -15,12 +15,12 @@ from utility_core import *
 
 def HOLE_function_Tche_caller_test(rep):
 
-    rep= rep + 30
+    rep= rep
     noise = 1e-6
     np.random.seed(rep)
 
 
-    max_number_DMqueries = [0,1]
+    max_number_DMqueries = [0, 1]
     first_query_iteration = [[0],
                             [0, 1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 99]]
 
@@ -100,7 +100,8 @@ def HOLE_function_Tche_caller_test(rep):
             InteractionwithDecisionMakerClass = ParetoFrontGeneration(model=model_f,
                                                                       space=space,
                                                                       seed=rep,
-                                                                      utility=u_funcs_true)
+                                                                      utility=u_funcs_true,
+                                                                      region_selection=False)
 
 
             evaluator = GPyOpt.core.evaluators.Sequential(EI_UU)
