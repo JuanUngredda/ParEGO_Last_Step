@@ -129,34 +129,34 @@ class ExpectedImprovementUtilityUncertainty(AcquisitionBase):
             Improvement = Utility - max_valX_evaluated
             Improvement[Improvement < 0] = 0.0
 
-            mean_improvement = np.mean(Improvement, axis=1)
-            Best_sampled_idx = np.argmax(Best_Sampled_Utility, axis=2)
-            print(Improvement.shape)
-            sampled_X = self.model.get_X_values()
-            print(sampled_X)
+            # mean_improvement = np.mean(Improvement, axis=1)
+            # Best_sampled_idx = np.argmax(Best_Sampled_Utility, axis=2)
+            # print(Improvement.shape)
+            # sampled_X = self.model.get_X_values()
+            # print(sampled_X)
 
-            for theta in range(5):
-                plt.scatter(X[:,0], X[:,1], c=mean_improvement[theta])
-                plt.scatter(sampled_X[:, 0], sampled_X[:, 1], color="white", edgecolor="black", s=80)
-                plt.scatter(sampled_X[Best_sampled_idx[theta], 0], sampled_X[Best_sampled_idx[theta], 1], color="red",
-                            edgecolor="black", s=80)
-                # plt.title("Parameter $\Theta_{}$".format(theta+1), size=20)
-                plt.xlim((-1,1))
-                plt.ylim((-1,1))
-                plt.title
-                plt.savefig(
-                    "/home/juan/Documents/repos_data/Last_Step_Preference_Learning/saved_plots/EI_UU_{}.pdf".format(
-                        theta),  bbox_inches="tight")
-                plt.show()
-
-            overall_mean_improvement = np.mean(Improvement, axis=(0, 1))
-            # plt.title("EI-UU", size=20)
-            plt.scatter(X[:, 0], X[:, 1], c=overall_mean_improvement )
-            plt.xlim((-1, 1))
-            plt.ylim((-1, 1))
-            plt.savefig("/home/juan/Documents/repos_data/Last_Step_Preference_Learning/saved_plots/EI_UU.pdf", bbox_inches="tight")
-            plt.show()
-            raise
+            # for theta in range(5):
+            #     plt.scatter(X[:,0], X[:,1], c=mean_improvement[theta])
+            #     plt.scatter(sampled_X[:, 0], sampled_X[:, 1], color="white", edgecolor="black", s=80)
+            #     plt.scatter(sampled_X[Best_sampled_idx[theta], 0], sampled_X[Best_sampled_idx[theta], 1], color="red",
+            #                 edgecolor="black", s=80)
+            #     # plt.title("Parameter $\Theta_{}$".format(theta+1), size=20)
+            #     plt.xlim((-1,1))
+            #     plt.ylim((-1,1))
+            #     plt.title
+            #     plt.savefig(
+            #         "/home/juan/Documents/repos_data/Last_Step_Preference_Learning/saved_plots/EI_UU_{}.pdf".format(
+            #             theta),  bbox_inches="tight")
+            #     plt.show()
+            #
+            # overall_mean_improvement = np.mean(Improvement, axis=(0, 1))
+            # # plt.title("EI-UU", size=20)
+            # plt.scatter(X[:, 0], X[:, 1], c=overall_mean_improvement )
+            # plt.xlim((-1, 1))
+            # plt.ylim((-1, 1))
+            # plt.savefig("/home/juan/Documents/repos_data/Last_Step_Preference_Learning/saved_plots/EI_UU.pdf", bbox_inches="tight")
+            # plt.show()
+            # raise
             # print("Improvement", np.mean(Improvement, axis=(0, 1)))
             marginal_acqX[:, h] += np.mean(Improvement, axis=(0, 1))
 
