@@ -20,8 +20,8 @@ def HOLE_function_Lin_caller_test(rep):
     np.random.seed(rep)
 
 
-    max_number_DMqueries = [5]
-    first_query_iteration = [
+    max_number_DMqueries = [0,5]
+    first_query_iteration = [[0],
                             [0, 1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 94] ]
 
     for num_queries_idx in range(len(max_number_DMqueries)):
@@ -59,14 +59,16 @@ def HOLE_function_Lin_caller_test(rep):
             acq_opt = GPyOpt.optimization.AcquisitionOptimizer(optimizer='lbfgs',
                                                                inner_optimizer='Nelder_Mead',
                                                                space=space,
-                                                               model=model_f)
+                                                               model=model_f,
+                                                               num_samples=1000)
 
 
             # --- Initial design
             #initial design
-            initial_design = GPyOpt.experiment_design.initial_design('latin',
+            initial_design = GPyOpt.experiment_design.initial_design('random',
                                                                      space, 2*(input_d + 1))
 
+            print(initial_design)
 
             # --- Bayesian Inference Object on the Utility
 
@@ -140,6 +142,6 @@ def HOLE_function_Lin_caller_test(rep):
         print("Code Ended")
         print("X",X,"Y",Y)
 
-HOLE_function_Lin_caller_test(rep=5)
+HOLE_function_Lin_caller_test(rep=12)
 
 

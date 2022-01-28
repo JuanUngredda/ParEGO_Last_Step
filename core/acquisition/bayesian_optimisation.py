@@ -278,8 +278,18 @@ class BO(object):
     def verbosity_plot_2D_unconstrained(self):
         ####plots
         print("generating plots")
-        design_plot = initial_design('random', self.space, 1000)
+        design_plot = initial_design('random', self.space, 100000)
 
+        func_val, _ = self.objective.evaluate(design_plot)
+        func_val = np.concatenate(func_val, axis=1)
+        plt.scatter(func_val[:, 0], func_val[:, 1], color="grey", s=10)#, c=np.array(true_utility_values).reshape(-1) )
+        plt.title("HOLE-1")
+        plt.xlabel("$Y_{1}$")
+        plt.ylabel("$Y_{2}$")
+        plt.savefig("/home/juan/Documents/repos_data/Last_Step_Preference_Learning/saved_plots/HOLE_fun.pdf",
+                    bbox_inches="tight")
+        plt.show()
+        raise
         # precision = []
         # for i in range(20):
         # kg_f = -self.acquisition._compute_acq(design_plot)
@@ -287,8 +297,6 @@ class BO(object):
 
         # print("mean precision", np.mean(precision, axis=0), "std precision",  np.std(precision, axis=0), "max precision", np.max(precision, axis=0), "min precision",np.min(precision, axis=0))
 
-        func_val, _ = self.objective.evaluate(design_plot)
-        func_val = np.concatenate(func_val, axis=1)
 
         mu_f = self.model.posterior_mean(design_plot)
         mu_f = np.stack(mu_f, axis=1)
@@ -311,6 +319,9 @@ class BO(object):
         # true_utility_values = true_underlying_utility(y = func_val,
         #                                            weights=true_parameters[1],
         #                                            parameters=true_parameters[0])
+
+        # plt.set_title('True PF Function')
+
         fig, axs = plt.subplots(2, 2)
 
         # optimistic_PF = self.acquisition.Inference_Object.Pareto_front
