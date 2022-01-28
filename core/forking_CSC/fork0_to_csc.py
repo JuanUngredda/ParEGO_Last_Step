@@ -118,7 +118,7 @@ ALL_CSC_NAMES = ["rilyeno", "torta", "adobo", "bulalo", "kinilaw", "okoy",
 # U = [0,2,3,4,5,6,7,8]
 # python fork0_to_csc.py /home/rawsys/matjiu/BOPL_Cornell-Warwick/experiments/control.py 14 --first_fork kumeta --basedir /home/rawsys/matjiu/RESULTS_BOPL --conda BOPL
 
-U = [ 8,11, 15,  18 , 19]#
+U = [  8, 11,15 ]#
 
 CSC_NAMES = [ALL_CSC_NAMES[i] for i in U]
 
