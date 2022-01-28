@@ -115,8 +115,12 @@ class ParetoFrontGeneration():
     def bounds_format_adapter(self, bounds):
         bounds = np.array(bounds)
         bounds_correct_format = []
-        for b in range(bounds.shape[0]):
+        # print("bounds", bounds)
+        for b in range(bounds.shape[1]):
             bounds_correct_format.append(list(bounds[:, b]))
+
+        # print("corrected", bounds_correct_format)
+        # raise
         return bounds_correct_format
 
     def mean_prediction_model(self, model):

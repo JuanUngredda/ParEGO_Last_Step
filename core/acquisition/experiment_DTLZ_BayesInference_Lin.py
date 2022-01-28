@@ -46,8 +46,8 @@ def HOLE_function_Lin_caller_test(rep):
     np.random.seed(rep)
 
 
-    max_number_DMqueries = [0,1]
-    first_query_iteration = [[0],
+    max_number_DMqueries = [1]
+    first_query_iteration = [
                             [0, 1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 99]]
 
     for num_queries_idx in range(len(max_number_DMqueries)):
@@ -169,7 +169,7 @@ def HOLE_function_Lin_caller_test(rep):
         print("X",X,"Y",Y)
 
 # for rep in range(10):
-# function_caller_test_function_2_penalty(rep)
+HOLE_function_Lin_caller_test(3)
 # for rep in range(10):
 # NO_HOLE_function_caller_test(3)
 # print("ready")
