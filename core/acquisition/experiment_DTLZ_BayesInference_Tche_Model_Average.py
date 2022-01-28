@@ -41,7 +41,7 @@ def f3(X, true_val=None):
 
 def DTLZ_function_Tche_caller_test(rep):
 
-    rep= rep
+    rep= rep +20
     noise = 1e-6
     np.random.seed(rep)
 
