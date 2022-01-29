@@ -42,7 +42,7 @@ def f3(X, true_val=None):
 
 def HOLE_function_Lin_caller_test(rep):
 
-    rep= rep +30
+    rep= rep +40
     noise = 1e-6
     np.random.seed(rep)
 
