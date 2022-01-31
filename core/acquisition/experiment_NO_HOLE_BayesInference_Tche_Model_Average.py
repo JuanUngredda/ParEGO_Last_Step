@@ -142,7 +142,7 @@ def HOLE_function_Tche_caller_test(rep):
         print("X",X,"Y",Y)
 
 # for rep in range(10):
-# HOLE_function_Tche_caller_test(3)
+HOLE_function_Tche_caller_test(13)
 # for rep in range(10):
 # NO_HOLE_function_caller_test(3)
 # print("ready")

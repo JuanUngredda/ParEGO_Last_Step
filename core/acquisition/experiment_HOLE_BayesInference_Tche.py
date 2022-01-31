@@ -75,7 +75,7 @@ def HOLE_function_Tche_caller_test(rep):
             Tche_u = Tchevichev_utility_func(n_params=n_f)
             Lin_u = Linear_utility_func(n_params=n_f)
 
-            assumed_u_funcs = [Tche_u]
+            assumed_u_funcs = [Lin_u]
             BayesInferenceUtility = Inference_method(assumed_u_funcs)
 
             # #Utility of the decision maker
@@ -138,7 +138,7 @@ def HOLE_function_Tche_caller_test(rep):
         print("X",X,"Y",Y)
 
 # for rep in range(10):
-# HOLE_function_Tche_caller_test(3)
+HOLE_function_Tche_caller_test(3)
 # for rep in range(10):
 # NO_HOLE_function_caller_test(3)
 # print("ready")
