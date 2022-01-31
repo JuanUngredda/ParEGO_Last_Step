@@ -97,6 +97,7 @@ class BO(object):
                          eps = 1e-8,
                          context = None,
                          verbosity=False,
+                         model_average = False,
                          path=None,
                          evaluations_file = None,
                          max_number_DMqueries=0,
@@ -123,6 +124,7 @@ class BO(object):
         self.rep = rep
         # --- Setting up stop conditions
         self.eps = eps
+        self.model_average = model_average
         if  (max_iter is None) and (max_time is None):
             self.max_iter = 0
             self.max_time = np.inf
@@ -429,11 +431,21 @@ class BO(object):
             Y_train = self.model.get_Y_values()
             Y_train = np.concatenate(Y_train, axis=1)
 
-            expected_utility = self.compute_expected_utility()
-            recommended_Y = Y_train[np.argmax(expected_utility)]
+            if self.model_average:
+                expected_utility = self.compute_expected_utility_MA()
+            else:
+                expected_utility = self.compute_expected_utility()
+
+            recommended_Y = Y_train[np.argmax(expected_utility.reshape(-1))]
+            # plt.scatter(Y_train[:,0], Y_train[:,1], c=expected_utility)
+            # plt.show()
+
             uval_sampled = true_underlying_utility(y=recommended_Y,
                                                    weights=true_parameters[1],
                                                    parameters=true_parameters[0])
+
+            # print("train_Y", Y_train)
+            # print("recommended_Y", recommended_Y)
             # print(uval_sampled)
             # raise
 
@@ -483,6 +495,38 @@ class BO(object):
         # print(Utility.shape)
         # raise
         return expected_utility
+
+    def compute_expected_utility_MA(self):
+        probability_models, posterior_parameter_samples, models = self.acquisition.Inference_Object.get_utility_information()
+
+        utility_list = []
+        for utility_idx, utility in enumerate(models):
+            Y_train = self.model.get_Y_values()
+            Y_train = np.concatenate(Y_train, axis=1)
+            Utility = utility(y=Y_train,
+                              weights=np.ones((posterior_parameter_samples[utility_idx][0].shape[0], 1)),
+                              parameters=posterior_parameter_samples[utility_idx],
+                              vectorised=True)
+            # plt.title("model "+str(utility) +" "+str(probability_models[utility_idx]))
+            # plt.hist(posterior_parameter_samples[utility_idx][0])
+            # plt.show()
+            # print(utility)
+            # print(posterior_parameter_samples[utility_idx][0])
+            expected_utility = np.mean(Utility, axis=0) * probability_models[utility_idx]
+            utility_list.append(expected_utility)
+        # print("utility_list", utility_list)
+        mean_utility = np.sum(utility_list, axis=0)
+        # print("expected_utility", expected_utility, "shape", expected_utility.shape)
+        # print("mean utility", mean_utility)
+        # raise
+        # plt.scatter(Y_train[:,0], Y_train[:,1], c=expected_utility.reshape(-1))
+        # plt.show()
+        # print(expected_utility.shape)
+        # print(Y_train.shape)
+        # print(utility_parameters)
+        # print(Utility.shape)
+        # raise
+        return mean_utility
 
     def get_true_utility_function(self):
         return self.DecisionMakerInteractor.get_true_utility_function()

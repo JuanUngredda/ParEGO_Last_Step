@@ -68,13 +68,18 @@ class Inference_method():
         if self.Dynamic_Utility_Selection:
             if self.Pareto_front is None:
                 self.probability_models = np.ones(len(self.u_funcs))/ np.sum(np.ones(len(self.u_funcs)))
-                self.accepted_parameters = None
+                self.accepted_parameters = [self.posterior_sampler(n_samples=50, seed=None)[0] for u in self.u_funcs]
                 self.models = [composed_utility_functions(u) for u in self.u_funcs]
+                print("self.probability_models",self.probability_models)
+                print("self.models",self.models)
+
             else:
                 Evidence, accepted_parameters, utilities = self.Evidence_computation(u_funcs=self.u_funcs)
                 self.probability_models = np.array(Evidence)/np.sum(Evidence)
                 self.accepted_parameters = accepted_parameters
                 self.models = utilities
+                print("self.probability_models",self.probability_models)
+                print("self.models",self.models)
 
 
     def Evidence_computation(self, u_funcs):
@@ -102,7 +107,7 @@ class Inference_method():
     def get_utility_information(self):
         if self.Pareto_front is None:
             self.probability_models = np.ones(len(self.u_funcs)) / np.sum(np.ones(len(self.u_funcs)))
-            self.accepted_parameters = None
+            self.accepted_parameters = [self.posterior_sampler(n_samples=50, seed=None)[0] for u in self.u_funcs]
             self.models = [composed_utility_functions(u) for u in self.u_funcs]
 
         return self.probability_models, self.accepted_parameters, self.models

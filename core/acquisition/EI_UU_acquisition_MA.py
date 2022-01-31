@@ -56,10 +56,13 @@ class ExpectedImprovementUtilityUncertainty(AcquisitionBase):
     def include_fantasised_posterior_samples(self, posterior_samples):
         self.fantasised_posterior_samples = posterior_samples
 
-    def get_posterior_samples(self):
+    def get_posterior_samples(self, n_samples=None):
         # posterior_samples = self.Inference_Object.get_generated_posterior_samples()
         # if posterior_samples is None:
-        posterior_samples = self.Inference_Object.posterior_sampler(self.n_samples)
+        if n_samples is None:
+            posterior_samples = self.Inference_Object.posterior_sampler(self.n_samples)
+        else:
+            posterior_samples = self.Inference_Object.posterior_sampler(n_samples)
         return posterior_samples
 
     def _compute_acq(self, X, parallel=True):
@@ -75,23 +78,23 @@ class ExpectedImprovementUtilityUncertainty(AcquisitionBase):
             lhd = lhs(self.model.output_dim, samples=50)
             self.W_samples = norm(loc=0, scale=1).ppf(lhd)  # Pseudo-random number generation to compute expectation
             self.old_number_of_simulation_samples = current_number_simulation_points
-            self.posterior_samples = self.get_posterior_samples()
-            self.probability_models, _, self.models = self.Inference_Object.get_utility_information()
+            # self.posterior_samples = self.get_posterior_samples(10)
+            # print(self.posterior_samples)
+            # raise
+            self.probability_models, self.posterior_parameter_samples, self.models = self.Inference_Object.get_utility_information()
 
-        marginal_acqX = self._marginal_acq(X, self.posterior_samples)
+        marginal_acqX = self._marginal_acq(X)
         acqX = marginal_acqX  # acqX = np.sum(marginal_acqX, axis=1) / len(self.utility_parameter_samples)
 
         #acqX = np.reshape(acqX, (X.shape[0], 1))
         return acqX.reshape(-1)
 
-    def _marginal_acq(self, X, utility_parameter_samples):
+    def _marginal_acq(self, X):
         """
         """
 
         marginal_acqX = np.zeros((X.shape[0], self.number_of_gp_hyps_samples))
         Z = self.W_samples[np.newaxis, :, np.newaxis, :]
-        utility_parameters = utility_parameter_samples[0]
-        linear_weight_combination = utility_parameter_samples[1]
 
         # print("linweight",linear_weight_combination.shape)
         # ALL dimensions adapated to be (Ntheta, Nz, Nx, Dimy)
@@ -99,7 +102,8 @@ class ExpectedImprovementUtilityUncertainty(AcquisitionBase):
             # self.model.set_hyperparameters(h)
             EI_val_model = []
             # print("models", self.models)
-            for utility in self.models:
+            for utility_idx, utility in enumerate(self.models):
+                # print("utility, utility_idx",utility, utility_idx)
                 meanX, varX = self.model.predict(X)
                 MU = np.stack(meanX, axis=1)
                 VARX = np.stack(varX, axis=1)
@@ -109,11 +113,12 @@ class ExpectedImprovementUtilityUncertainty(AcquisitionBase):
                 fX_evaluated = self.model.posterior_mean_at_evaluated_points()
                 fX_evaluated = np.stack(fX_evaluated, axis=1)[np.newaxis, np.newaxis, :, :]
 
+                # print("self.posterior_parameter_samples[utility_idx].shape[0]",self.posterior_parameter_samples)
                 Best_Sampled_Utility =utility(y = fX_evaluated,
-                                              weights=linear_weight_combination,
-                                              parameters=utility_parameters,
+                                              weights=np.ones((self.posterior_parameter_samples[utility_idx][0].shape[0], 1)),
+                                              parameters=self.posterior_parameter_samples[utility_idx],
                                               vectorised=True)
-
+                # print("Best_Sampled_Utility",Best_Sampled_Utility.shape)
                 max_valX_evaluated = np.max(Best_Sampled_Utility, axis=-1)
                 max_valX_evaluated = max_valX_evaluated[:, :, np.newaxis]
                 # print("max_valX_evaluated",max_valX_evaluated.shape)
@@ -123,8 +128,8 @@ class ExpectedImprovementUtilityUncertainty(AcquisitionBase):
 
                 # print("Y", Y.shape)
                 Utility = utility(y = Y,
-                                  weights=linear_weight_combination,
-                                  parameters=utility_parameters ,
+                                  weights=np.ones((self.posterior_parameter_samples[utility_idx][0].shape[0], 1)),
+                                  parameters=self.posterior_parameter_samples[utility_idx],
                                   vectorised=True)
 
 
@@ -132,10 +137,10 @@ class ExpectedImprovementUtilityUncertainty(AcquisitionBase):
                 Improvement[Improvement < 0] = 0.0
 
                 # print("Improvement", np.mean(Improvement, axis=(0, 1)))
-                marginal_acqX[:, h] += np.mean(Improvement, axis=(0, 1))
-                EI_val_model.append(marginal_acqX[:, h])
+                marginal_acqX[:, h] += np.mean(Improvement, axis=(0, 1)) * self.probability_models[utility_idx]
+                # EI_val_model.append(marginal_acqX[:, h])
 
-            overall_EI_val = np.sum([EI_val_model[m] * self.probability_models[m] for m in range(len(self.models))], axis=0)
+            overall_EI_val = marginal_acqX #np.sum([EI_val_model[m]  for m in range(len(self.models))], axis=0)
             # print(self.probability_models, self.models)
             # print("X",X.shape)
             # print("overall_EI_val",overall_EI_val.shape)

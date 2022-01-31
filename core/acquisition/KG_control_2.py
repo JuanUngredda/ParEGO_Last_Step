@@ -46,11 +46,13 @@ import argparse
 # from experiment_HOLE_BayesInference_LinLin import HOLE_function_Lin_caller_test as f5
 # from experiment_HOLE_BayesInference_Lin import HOLE_function_Lin_caller_test as f3
 
-from experiment_DTLZ_BayesInference_Lin import HOLE_function_Lin_caller_test as f1
-from experiment_DTLZ_BayesInference_Tche import HOLE_function_Lin_caller_test as f2
-from experiment_DTLZ_BayesInference_LinLin import HOLE_function_Lin_caller_test as f3
-from experiment_DTLZ_BayesInference_Tche_Model_Average import DTLZ_function_Tche_caller_test as f4
+# from experiment_DTLZ_BayesInference_Lin import HOLE_function_Lin_caller_test as f1
+# from experiment_DTLZ_BayesInference_Tche import HOLE_function_Lin_caller_test as f2
+# from experiment_DTLZ_BayesInference_LinLin import HOLE_function_Lin_caller_test as f3
 
+from experiment_DTLZ_BayesInference_Tche_Model_Average import DTLZ_function_Tche_caller_test as f1
+# from experiment_HOLE_BayesInference_Tche_Model_Average import HOLE_function_Tche_caller_test as f2
+# from experiment_NO_HOLE_BayesInference_Tche_Model_Average import HOLE_function_Tche_caller_test as f3
 def run(args):
     """
     This is a stupid function just for demonstration purposes.
@@ -78,7 +80,7 @@ def run(args):
     # IMPORT AND RUN MODULES
     #functions = [function_caller_new_brannin_TS, function_caller_test_func_2_TS, function_caller_mistery_TS, function_caller_RMITD_TS, function_caller_RMITD_EI, function_caller_RMITD]
     #functions = [function_caller_RMITD ]
-    functions = [f1, f2, f3, f4]
+    functions = [f1]
 
     for func in functions:
         func(args.k)
