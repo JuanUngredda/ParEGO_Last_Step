@@ -20,9 +20,8 @@ def HOLE_function_Tche_caller_test(rep):
     np.random.seed(rep)
 
 
-    max_number_DMqueries = [0,1]
-    first_query_iteration = [[0],
-                            [0, 1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 99]]
+    max_number_DMqueries = [0]
+    first_query_iteration = [[0]]
 
     for num_queries_idx in range(len(max_number_DMqueries)):
 
@@ -75,7 +74,7 @@ def HOLE_function_Tche_caller_test(rep):
             Tche_u = Tchevichev_utility_func(n_params=n_f)
             Lin_u = Linear_utility_func(n_params=n_f)
 
-            assumed_u_funcs = [Lin_u]
+            assumed_u_funcs = [Tche_u]
             BayesInferenceUtility = Inference_method(assumed_u_funcs)
 
             # #Utility of the decision maker
@@ -138,7 +137,7 @@ def HOLE_function_Tche_caller_test(rep):
         print("X",X,"Y",Y)
 
 # for rep in range(10):
-HOLE_function_Tche_caller_test(3)
+# HOLE_function_Tche_caller_test(3)
 # for rep in range(10):
 # NO_HOLE_function_caller_test(3)
 # print("ready")

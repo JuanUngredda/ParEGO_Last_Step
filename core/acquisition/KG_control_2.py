@@ -54,8 +54,35 @@ import argparse
 # from experiment_HOLE_BayesInference_Tche_Model_Average import HOLE_function_Tche_caller_test as f2
 # from experiment_NO_HOLE_BayesInference_Tche_Model_Average import HOLE_function_Tche_caller_test as f3
 
-from experiment_NO_HOLE_BayesInference_20_evaluations import NO_HOLE_function_caller_test as f1
-from experiment_NO_HOLE_BayesInference_200_evaluations import NO_HOLE_function_caller_test  as f2
+# from experiment_NO_HOLE_BayesInference_20_evaluations import NO_HOLE_function_caller_test as f1
+# from experiment_NO_HOLE_BayesInference_200_evaluations import NO_HOLE_function_caller_test  as f2
+
+
+
+
+
+from experiment_DTLZ_BayesInference_Lin import HOLE_function_Lin_caller_test as f1
+from experiment_DTLZ_BayesInference_LinLin import HOLE_function_Lin_caller_test as f2
+from experiment_DTLZ_BayesInference_Tche_Model_Average import DTLZ_function_Tche_caller_test as f3
+from experiment_DTLZ_BayesInference_Tche import HOLE_function_Lin_caller_test as f4
+
+
+from experiment_NO_HOLE_BayesInference_Lin import HOLE_function_Lin_caller_test as f5
+from experiment_NO_HOLE_BayesInference_LinLin import HOLE_function_Lin_caller_test as f6
+from experiment_NO_HOLE_BayesInference_Tche_Model_Average import HOLE_function_Tche_caller_test as f7
+from experiment_NO_HOLE_BayesInference import NO_HOLE_function_caller_test as f8
+
+
+from experiment_HOLE_BayesInference_Lin import HOLE_function_Lin_caller_test as f9
+from experiment_HOLE_BayesInference_LinLin import HOLE_function_Lin_caller_test as f10
+from experiment_HOLE_BayesInference_Tche_Model_Average import HOLE_function_Tche_caller_test as f11
+from experiment_HOLE_BayesInference_Tche import HOLE_function_Tche_caller_test as f12
+
+from experiment_NO_HOLE_BayesInference_20_evaluations import NO_HOLE_function_caller_test as f13
+from experiment_DTLZ_BayesInference_20_evaluations_Tche import HOLE_function_Lin_caller_test as f14
+from experiment_NO_HOLE_BayesInference_200_evaluations import NO_HOLE_function_caller_test as f15
+from experiment_DTLZ_BayesInference_200_evaluations_Tche import HOLE_function_Lin_caller_test as f16
+
 def run(args):
     """
     This is a stupid function just for demonstration purposes.
@@ -83,7 +110,7 @@ def run(args):
     # IMPORT AND RUN MODULES
     #functions = [function_caller_new_brannin_TS, function_caller_test_func_2_TS, function_caller_mistery_TS, function_caller_RMITD_TS, function_caller_RMITD_EI, function_caller_RMITD]
     #functions = [function_caller_RMITD ]
-    functions = [f1, f2]
+    functions = [f1, f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13,f14,f15,f16]
 
     for func in functions:
         func(args.k)

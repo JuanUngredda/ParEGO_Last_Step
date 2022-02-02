@@ -20,8 +20,8 @@ def NO_HOLE_function_caller_test(rep):
     np.random.seed(rep)
 
 
-    max_number_DMqueries = [0, 1]
-    first_query_iteration = [[0], [0, 1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 99]]
+    max_number_DMqueries = [0]
+    first_query_iteration = [[0]]
 
     for num_queries_idx in range(len(max_number_DMqueries)):
 
@@ -122,22 +122,24 @@ def NO_HOLE_function_caller_test(rep):
                     X_init=initial_design,
                     DecisionMakerInteractor = AcquisitionwithDMInteration)
 
-
+            first_query_position = int(np.floor((first_query_iteration_element/100)*20))
             # print("Finished Initialization")
+            print(first_query_position)
+
             X, Y, Opportunity_cost = bo.run_optimization(max_iter =20,
                                                             rep=rep,
                                                             path=path,
                                                             verbosity=False,
                                                              max_number_DMqueries=max_number_DMqueries[num_queries_idx],
-                                                             first_query_iteration=first_query_iteration_element
+                                                             first_query_iteration=first_query_position
                                                              )
 
         print("Code Ended")
 
-        print("X",X, "Y",Y)
+        # print("X",X, "Y",Y)
 
 # for rep in range(10):
-# function_caller_test_function_2_penalty(rep)
+#     NO_HOLE_function_caller_test(rep=rep+11)
 # for rep in range(10):
 # NO_HOLE_function_caller_test(3)
 # print("ready")

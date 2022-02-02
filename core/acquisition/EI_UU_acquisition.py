@@ -159,21 +159,21 @@ class ExpectedImprovementUtilityUncertainty(AcquisitionBase):
             #             theta), bbox_inches="tight")
             #     plt.show()
             #
-            #     plt.scatter(mean_vals[:,0], mean_vals[:,1], c = mean_improvement[theta], s=200)
-            #     plt.scatter(fX_evaluated[:,0], fX_evaluated[:,1], color="white", edgecolor="black", s=120)
-            #     plt.scatter(fX_evaluated[Best_sampled_idx[theta], 0], fX_evaluated[Best_sampled_idx[theta], 1], color="red",
-            #                 edgecolor="black", s=120)
-            #     plt.xlabel("max $f_{1}$", size=20)
-            #     plt.ylabel("max $f_{2}$", size=20)
-            #     plt.title("EI-UU (Objective Space)", size=20)
-            #     # delta = (np.max(mean_improvement[theta]) - np.min(mean_improvement[theta])) / 10.0
-            #     plt.colorbar()#ticks=np.arange(np.min(mean_improvement[theta]), np.max(mean_improvement[theta]), delta))
-            #     plt.savefig(
-            #         "/home/juan/Documents/repos_data/Last_Step_Preference_Learning/saved_plots/EI_UU_Objective_Space_{}.pdf".format(
-            #             theta),  bbox_inches="tight")
-            #
-            #
-            #     plt.show()
+            #     # plt.scatter(mean_vals[:,0], mean_vals[:,1], c = mean_improvement[theta], s=200)
+            #     # plt.scatter(fX_evaluated[:,0], fX_evaluated[:,1], color="white", edgecolor="black", s=120)
+            #     # plt.scatter(fX_evaluated[Best_sampled_idx[theta], 0], fX_evaluated[Best_sampled_idx[theta], 1], color="red",
+            #     #             edgecolor="black", s=120)
+            #     # plt.xlabel("max $f_{1}$", size=20)
+            #     # plt.ylabel("max $f_{2}$", size=20)
+            #     # plt.title("EI-UU (Objective Space)", size=20)
+            #     # # delta = (np.max(mean_improvement[theta]) - np.min(mean_improvement[theta])) / 10.0
+            #     # plt.colorbar()#ticks=np.arange(np.min(mean_improvement[theta]), np.max(mean_improvement[theta]), delta))
+            #     # plt.savefig(
+            #     #     "/home/juan/Documents/repos_data/Last_Step_Preference_Learning/saved_plots/EI_UU_Objective_Space_{}.pdf".format(
+            #     #         theta),  bbox_inches="tight")
+            #     #
+            #     #
+            #     # plt.show()
             #
             # overall_mean_improvement = np.mean(Improvement, axis=(0, 1))
             # # plt.title("EI-UU", size=20)
@@ -188,17 +188,18 @@ class ExpectedImprovementUtilityUncertainty(AcquisitionBase):
             #     "/home/juan/Documents/repos_data/Last_Step_Preference_Learning/saved_plots/Overall_EI_UU_Solution_Space.pdf".format(
             #         theta), bbox_inches="tight")
             # plt.show()
-            # plt.scatter(mean_vals[:, 0], mean_vals[:, 1], c=overall_mean_improvement, s=200)
-            # plt.scatter(fX_evaluated[:, 0], fX_evaluated[:, 1], color="white", edgecolor="black", s=120)
-            # plt.xlabel("max $f_{1}$", size=20)
-            # plt.ylabel("max $f_{2}$", size=20)
-            # plt.title("EI-UU (Objective Space)", size=20)
-            # # delta = (np.max(overall_mean_improvement) - np.min(overall_mean_improvement))/10.0
-            # plt.colorbar()#ticks=np.arange(np.min(overall_mean_improvement), np.max(overall_mean_improvement), delta))
-            # plt.savefig(
-            #     "/home/juan/Documents/repos_data/Last_Step_Preference_Learning/saved_plots/Overall_EI_UU_Objective_Space.pdf".format(
-            #         theta), bbox_inches="tight")
-            # plt.show()
+            #
+            # # plt.scatter(mean_vals[:, 0], mean_vals[:, 1], c=overall_mean_improvement, s=200)
+            # # plt.scatter(fX_evaluated[:, 0], fX_evaluated[:, 1], color="white", edgecolor="black", s=120)
+            # # plt.xlabel("max $f_{1}$", size=20)
+            # # plt.ylabel("max $f_{2}$", size=20)
+            # # plt.title("EI-UU (Objective Space)", size=20)
+            # # # delta = (np.max(overall_mean_improvement) - np.min(overall_mean_improvement))/10.0
+            # # plt.colorbar()#ticks=np.arange(np.min(overall_mean_improvement), np.max(overall_mean_improvement), delta))
+            # # plt.savefig(
+            # #     "/home/juan/Documents/repos_data/Last_Step_Preference_Learning/saved_plots/Overall_EI_UU_Objective_Space.pdf".format(
+            # #         theta), bbox_inches="tight")
+            # # plt.show()
             # raise
             # print("Improvement", np.mean(Improvement, axis=(0, 1)))
             marginal_acqX[:, h] += np.mean(Improvement, axis=(0, 1))

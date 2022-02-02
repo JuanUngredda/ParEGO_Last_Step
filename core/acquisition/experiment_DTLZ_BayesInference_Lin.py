@@ -41,14 +41,13 @@ def f3(X, true_val=None):
 
 def HOLE_function_Lin_caller_test(rep):
 
-    rep= rep +60
+    rep= rep
     noise = 1e-6
     np.random.seed(rep)
 
 
-    max_number_DMqueries = [1]
-    first_query_iteration = [
-                            [0, 1 , 10, 20, 30, 40, 50, 60, 70, 80, 90, 99]]
+    max_number_DMqueries = [0]
+    first_query_iteration = [[0]]
 
     for num_queries_idx in range(len(max_number_DMqueries)):
 

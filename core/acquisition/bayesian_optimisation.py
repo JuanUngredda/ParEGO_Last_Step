@@ -155,6 +155,7 @@ class BO(object):
         self.data["Utility_sampled"] = np.array([])
         self.data["Utility"] = np.array([])
         self.data["Best_Utility"] = np.array([])
+        self.data["Utility_sampled_all_front"] = np.array([])
         value_so_far = []
 
         # --- Initialize time cost of the evaluations
@@ -444,15 +445,18 @@ class BO(object):
                                                    weights=true_parameters[1],
                                                    parameters=true_parameters[0])
 
-            # print("train_Y", Y_train)
-            # print("recommended_Y", recommended_Y)
-            # print(uval_sampled)
-            # raise
+
+            uval_sampled_all_front = np.max(true_underlying_utility(y=Y_train,
+                                                          weights=true_parameters[1],
+                                                          parameters=true_parameters[0]))
+
 
             N_entries = len(self.data["Utility"].reshape(-1))
             true_best_x, true_best_val = self.compute_underlying_best()
             self.data["Best_Utility"] = np.repeat(true_best_val, N_entries)
 
+            self.data["Utility_sampled_all_front"] = np.concatenate(
+                (self.data["Utility_sampled_all_front"], np.array(uval_sampled_all_front).reshape(-1)))
 
         self.data["Utility_sampled"] = np.concatenate((self.data["Utility_sampled"], np.array(uval_sampled).reshape(-1)))
 
