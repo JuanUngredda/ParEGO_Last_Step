@@ -15,7 +15,7 @@ from utility_core import *
 
 def NO_HOLE_function_caller_test(rep):
 
-    rep= rep + 5
+    rep= rep
     noise = 1e-6
     np.random.seed(rep)
 
