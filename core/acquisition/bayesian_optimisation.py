@@ -458,6 +458,9 @@ class BO(object):
             self.data["Utility_sampled_all_front"] = np.concatenate(
                 (self.data["Utility_sampled_all_front"], np.array(uval_sampled_all_front).reshape(-1)))
 
+
+
+
         self.data["Utility_sampled"] = np.concatenate((self.data["Utility_sampled"], np.array(uval_sampled).reshape(-1)))
 
 
@@ -470,6 +473,21 @@ class BO(object):
                 os.makedirs(self.path +"/" + results_folder  , exist_ok=True)
 
             gen_file.to_csv(path_or_buf=path)
+
+            Y_train = self.model.get_Y_values()
+            Y_train = np.concatenate(Y_train, axis=1)
+            data_path = self.path +"/" + results_folder + '/sampled_Y_' + str(self.rep) + '.csv'
+            np.savetxt(data_path, Y_train, delimiter=",")
+
+            best_Y, cost_new = self.objective.evaluate(true_best_x)
+            best_Y = np.concatenate(best_Y, axis=1)
+            print(best_Y)
+
+            data_path = self.path + "/" + results_folder + '/true_best_Y_' + str(self.rep) + '.csv'
+            np.savetxt(data_path, best_Y, delimiter=",")
+
+            data_path = self.path + "/" + results_folder + '/true_best_utility_' + str(self.rep) + '.csv'
+            np.savetxt(data_path, true_best_val - uval_sampled_all_front, delimiter=",")
 
             # extra_data ={"parameters":true_parameters, "number_of_queries":self.number_of_queries_taken}
             # extra_gen_file = pd.DataFrame.from_dict(extra_data)
