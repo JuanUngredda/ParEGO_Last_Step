@@ -15,7 +15,7 @@ from utility_core import *
 
 def HOLE_function_Lin_caller_test(rep):
 
-    rep= rep + 10
+    rep= rep
     noise = 1e-6
     np.random.seed(rep)
 
