@@ -80,8 +80,9 @@ import argparse
 # from experiment_NO_HOLE_BayesInference_20_evaluations import NO_HOLE_function_caller_test as f13
 # from experiment_DTLZ_BayesInference_20_evaluations_Tche import HOLE_function_Lin_caller_test as f14
 # from experiment_NO_HOLE_BayesInference_200_evaluations import NO_HOLE_function_caller_test as f15
-from experiment_DTLZ_BayesInference_200_evaluations_Tche import HOLE_function_Lin_caller_test as f1
-
+# from experiment_DTLZ_BayesInference_200_evaluations_Tche import HOLE_function_Lin_caller_test as f1
+from experiment_HOLE_BayesInference_20_evaluations import HOLE_function_caller_test as f1
+# from experiment_HOLE_BayesInference_200_evaluations import HOLE_function_caller_test as f2
 # from experiment_NO_HOLE_BayesInference_Lin import HOLE_function_Lin_caller_test as f1
 # from experiment_NO_HOLE_BayesInference_LinLin import HOLE_function_Lin_caller_test as f2
 
