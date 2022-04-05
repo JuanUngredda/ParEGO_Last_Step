@@ -66,12 +66,11 @@ def run(args):
     #functions = [function_caller_RMITD ]
 
     # IMPORT AND RUN MODULES
-    from forking_CSC.fork0_to_csc import U
 
-    number_of_csc_machines = len(U)
+    number_of_csc_machines = 2
     # print(number_of_csc_machines)
-    from core.acquisition.experiment_VehicleSafety_BayesInference_Tche import VehicleSafety_function_Tche_caller_test as f1
-    from core.acquisition.experiment_VehicleSafety_perfect_information_Tche import VehicleSafety_function_Tche_caller_test as f2
+    from experiment_VehicleSafety_BayesInference_Tche import VehicleSafety_function_Tche_caller_test as f1
+    from experiment_VehicleSafety_perfect_information_Tche import VehicleSafety_function_Tche_caller_test as f2
     functions = [f1, f2]
     seed = 0
     while True:
