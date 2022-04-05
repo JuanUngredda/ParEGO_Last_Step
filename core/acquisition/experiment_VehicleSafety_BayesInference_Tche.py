@@ -14,7 +14,7 @@ from botorch.test_functions.multi_objective import VehicleSafety
 #ALWAYS check cost in
 # --- Function to optimize
 
-from pymoo.factory import get_problem
+# from pymoo.factory import get_problem
 # import matplotlib as mpl
 # mpl.use('Qt5Agg')  # or can use 'TkAgg', whatever you have/prefer
 
