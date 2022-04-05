@@ -7,7 +7,7 @@ import argparse
 # from KG_DEB_experiment import DEB_function_caller_test
 # from KG_SRN_experiment import SRN_function_caller_test
 #from KG_BNH_experiment import BNH_function_caller_test
-from KG_TNK_BNH_experiment import TNK_BNH_function_caller_test
+# from KG_TNK_BNH_experiment import TNK_BNH_function_caller_test
 #from HVI_TNK_BNH_experiment import TNK_BNH_function_caller_test
 #from HVI_BNH_experiment import BNH_function_caller_test
 # from test_func_2_experiment import function_caller_test_func_2
