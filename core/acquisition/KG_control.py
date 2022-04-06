@@ -69,9 +69,9 @@ def run(args):
 
     number_of_csc_machines = 2
     # print(number_of_csc_machines)
-    from experiment_VehicleSafety_BayesInference_Tche import VehicleSafety_function_Tche_caller_test as f1
+    from experiment_ZDT_BayesInference_Tche import ZDT_function_Tche_caller_test as f1
     from experiment_VehicleSafety_perfect_information_Tche import VehicleSafety_function_Tche_caller_test as f2
-    functions = [f1, f2]
+    functions = [f1]
     seed = 0
     while True:
         for func in functions:

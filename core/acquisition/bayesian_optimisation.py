@@ -453,7 +453,7 @@ class BO(object):
 
             N_entries = len(self.data["Utility"].reshape(-1))
             true_best_x, true_best_val = self.compute_underlying_best()
-            self.data["Best_Utility"] = np.repeat(true_best_val, N_entries)
+            self.data["Best_Utility"] = np.concatenate((self.data["Best_Utility"], np.array(true_best_val).reshape(-1)))
 
             self.data["Utility_sampled_all_front"] = np.concatenate(
                 (self.data["Utility_sampled_all_front"], np.array(uval_sampled_all_front).reshape(-1)))
@@ -576,7 +576,8 @@ class BO(object):
             return -np.array(uval).reshape(-1)
 
         true_best_x, true_best_val = optimiser(f=top_true_utility)
-
+        print("true_best vals", true_best_val)
+        # raise
         return true_best_x, -true_best_val
 
 

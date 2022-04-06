@@ -8,10 +8,9 @@ from bayesian_optimisation import BO
 import os
 from DecisionMakerLastStepsInteraction import AcquisitionFunctionandDecisionMakerInteraction
 from EI_UU_acquisition import ExpectedImprovementUtilityUncertainty
-from perfect_information_EI_UU_acquisition import ExpectedImprovementUtilityUncertaintywithPointUtility
 from utility_core import *
 import torch
-from botorch.test_functions.multi_objective import VehicleSafety
+from botorch.test_functions.multi_objective import VehicleSafety, ZDT1
 #ALWAYS check cost in
 # --- Function to optimize
 
@@ -20,14 +19,14 @@ from botorch.test_functions.multi_objective import VehicleSafety
 # mpl.use('Qt5Agg')  # or can use 'TkAgg', whatever you have/prefer
 
 # problem = get_problem("dtlz2", n_var=d, n_obj=m)
-d = 5
-m = 3
+d = 3
+m = 2
 dtype = torch.double
-fun = VehicleSafety(negate=False).to(
+fun = ZDT1(dim=d,negate=False).to(
     dtype=dtype
 )
 
-space = GPyOpt.Design_space(space=[{'name': 'var', 'type': 'continuous', 'domain': (1, 3), 'dimensionality': d}])
+space = GPyOpt.Design_space(space=[{'name': 'var', 'type': 'continuous', 'domain': (0, 1), 'dimensionality': d}])
 
 def f1(X, true_val=None):
     X = torch.Tensor(X)
@@ -37,40 +36,36 @@ def f2(X, true_val=None):
     X = torch.Tensor(X)
     fval = fun(X)[:, 1].numpy()
     return -fval
-def f3(X, true_val=None):
-    X = torch.Tensor(X)
-    fval = fun(X)[:, 2].numpy()
-    return -fval
+
 # Attributes
 # initial_design = GPyOpt.experiment_design.initial_design('latin',
-#                                                      space, 1000000)# * (d + 1))
+#                                                      space, 10000)# * (d + 1))
 #
 #
 # f1_vals= f1(initial_design)
 # f2_vals= f2(initial_design)
-# f3_vals= f3(initial_design)
 # fig = plt.figure(figsize=(12, 12))
-# ax = fig.add_subplot(projection='3d')
-# ax.scatter(f1_vals, f2_vals, f3_vals, s=3)
+# # ax = fig.add_subplot(projection='2d')
+# plt.scatter(f1_vals, f2_vals, s=3)
 # plt.show()
 # raise
 
-def VehicleSafety_function_Tche_caller_test(rep):
+def ZDT_function_Tche_caller_test(rep):
 
     rep= rep
     noise = 1e-4
     np.random.seed(rep)
 
 
-    max_number_DMqueries = [1]
-    first_query_iteration = [[10,20,30,40,50,60,70,80,90]]
+    max_number_DMqueries = [0, 1]
+    first_query_iteration = [[0], [10,20,30,40,50,60,70,80,90]]
 
     for num_queries_idx in range(len(max_number_DMqueries)):
 
         for first_query_iteration_element in first_query_iteration[num_queries_idx]:
 
             folder = "RESULTS"
-            subfolder = "VehicleSafety_PI_EI_UU_SLS_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
+            subfolder = "ZDT1_Bayes_Assum_Tche_U_Tche_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
             cwd = os.getcwd()
             path = cwd + "/" + folder + "/" + subfolder
 
@@ -79,16 +74,18 @@ def VehicleSafety_function_Tche_caller_test(rep):
 
             # --- Attributes
             # repeat same objective function to solve a 1 objective problem
-            f = MultiObjective([f1, f2, f3])
+            f = MultiObjective([f1, f2])
 
             # --- Attributes
             # repeat same objective function to solve a 1 objective problem
 
             # --- Space
             # define space of variables
+            # space =  GPyOpt.Design_space(space =[{'name': 'var_1', 'type': 'continuous', 'domain': (-1.0, 1.0)},
+            #                                      {'name': 'var_2', 'type': 'continuous', 'domain': (-1.0, 1.0)}])
 
             space = GPyOpt.Design_space(
-                space=[{'name': 'var', 'type': 'continuous', 'domain': (1, 3), 'dimensionality': d}])
+                space=[{'name': 'var', 'type': 'continuous', 'domain': (0, 1), 'dimensionality': d}])
 
             n_f = m
             input_d = d
@@ -127,8 +124,7 @@ def VehicleSafety_function_Tche_caller_test(rep):
             # true_u_funcs = [Lin_u]
 
             # --- Utility function
-            EI_UU = ExpectedImprovementUtilityUncertaintywithPointUtility(model=model_f,
-                                                                          first_DM_query=first_query_iteration_element,
+            EI_UU = ExpectedImprovementUtilityUncertainty(model=model_f,
                                                           space=space,
                                                           optimizer = acq_opt,
                                                           Inference_Object=BayesInferenceUtility)
@@ -144,12 +140,6 @@ def VehicleSafety_function_Tche_caller_test(rep):
                                                                       seed=rep,
                                                                       utility=u_funcs_true)
 
-
-            true_dm_utility_function = InteractionwithDecisionMakerClass.get_true_utility_values()
-            true_dm_utility_parameters = InteractionwithDecisionMakerClass.get_true_parameters()
-
-            EI_UU.include_true_dm_utility_vals(true_dm_utility_function)
-            EI_UU.include_true_dm_utility_parameters(true_dm_utility_parameters)
 
             evaluator = GPyOpt.core.evaluators.Sequential(EI_UU)
 
