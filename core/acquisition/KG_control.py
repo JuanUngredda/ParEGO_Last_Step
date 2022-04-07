@@ -63,7 +63,7 @@ def run(args):
 
     # IMPORT AND RUN MODULES
 
-    number_of_csc_machines = 8
+    number_of_csc_machines = 3
     # print(number_of_csc_machines)
     # from experiment_ZDT_BayesInference_Tche import ZDT_function_Tche_caller_test as f1
     # from experiment_ZDT_perfect_information_Tche import ZDT_function_Tche_caller_test as f2
