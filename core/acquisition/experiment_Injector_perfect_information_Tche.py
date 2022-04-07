@@ -62,8 +62,8 @@ def RocketInjector_function_Tche_caller_test(rep):
     np.random.seed(rep)
 
 
-    max_number_DMqueries = [1]
-    first_query_iteration = [[10,20,30,40,50,60,70,80,90]]
+    max_number_DMqueries = [0, 1]
+    first_query_iteration = [[0],[10,20,30,40,50,60,70,80,90]]
 
     for num_queries_idx in range(len(max_number_DMqueries)):
 
