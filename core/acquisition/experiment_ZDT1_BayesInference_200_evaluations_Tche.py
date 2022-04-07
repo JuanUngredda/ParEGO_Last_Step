@@ -14,7 +14,7 @@ from botorch.test_functions.multi_objective import VehicleSafety, ZDT1
 #ALWAYS check cost in
 # --- Function to optimize
 
-from pymoo.factory import get_problem
+# from pymoo.factory import get_problem
 d = 3
 m = 2
 dtype = torch.double
