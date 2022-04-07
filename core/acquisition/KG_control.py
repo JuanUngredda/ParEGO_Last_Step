@@ -66,8 +66,10 @@ def run(args):
     number_of_csc_machines = 8
     # print(number_of_csc_machines)
     # from experiment_ZDT_BayesInference_Tche import ZDT_function_Tche_caller_test as f1
-    from experiment_ZDT_perfect_information_Tche import ZDT_function_Tche_caller_test as f2
-    functions = [f2]
+    # from experiment_ZDT_perfect_information_Tche import ZDT_function_Tche_caller_test as f2
+    from experiment_ZDT1_BayesInference_20_evaluations_Tche import ZDT1_function_Lin_caller_test as f1
+    from experiment_ZDT1_BayesInference_200_evaluations_Tche import ZDT1_function_Lin_caller_test as f2
+    functions = [f1, f2]
     seed = 0
     while True:
         for func in functions:
