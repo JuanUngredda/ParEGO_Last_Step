@@ -1,14 +1,11 @@
 # Copyright (c) 2016, the GPyOpt Authors
 # Licensed under the BSD 3-clause license (see LICENSE.txt)
 
-from .optimizer import OptLbfgs, OptSgd, OptDirect, OptCma, apply_optimizer, choose_optimizer
-from .anchor_points_generator import ObjectiveAnchorPointsGenerator, ThompsonSamplingAnchorPointsGenerator
-from ..core.task.space import Design_space
 import numpy as np
-import matplotlib.pyplot as plt
-from scipy.optimize import minimize
-import time
 from scipy.stats import norm
+
+from .anchor_points_generator import ObjectiveAnchorPointsGenerator, ThompsonSamplingAnchorPointsGenerator
+from .optimizer import apply_optimizer, choose_optimizer
 
 max_objective_anchor_points_logic = "max_objective"
 thompson_sampling_anchor_points_logic = "thompsom_sampling"
@@ -29,10 +26,10 @@ class AcquisitionOptimizer(object):
 
     def __init__(self, space, optimizer='sgd', inner_optimizer='lbfgs', **kwargs):
 
-        self.space              = space
-        self.optimizer_name     = optimizer
-        self.inner_optimizer_name     = inner_optimizer
-        self.kwargs             = kwargs
+        self.space = space
+        self.optimizer_name = optimizer
+        self.inner_optimizer_name = inner_optimizer
+        self.kwargs = kwargs
         self.inner_anchor_points = None
         self.outer_anchor_points = None
         ### -- save extra options than can be passed to the optimizer
@@ -40,7 +37,6 @@ class AcquisitionOptimizer(object):
             self.model = self.kwargs['model']
 
         if 'model_c' in self.kwargs:
-
             self.model_c = self.kwargs['model_c']
 
         if 'anchor_points_logic' in self.kwargs:
@@ -51,8 +47,8 @@ class AcquisitionOptimizer(object):
         ## -- Context handler: takes
         self.context_manager = ContextManager(space)
 
-
-    def optimize(self, f=None, df=None, f_df=None, duplicate_manager=None, re_use=False ,sweet_spot=False, num_samples=5000, verbose=True):
+    def optimize(self, f=None, df=None, f_df=None, duplicate_manager=None, re_use=False,
+                 sweet_spot=False, num_samples=5000, verbose=True):
         """
         Optimizes the input function.
 
@@ -61,7 +57,6 @@ class AcquisitionOptimizer(object):
         :param f_df: returns both the function to optimize and its gradient.
 
         """
-
 
         self.f = f
         self.df = df
@@ -74,71 +69,27 @@ class AcquisitionOptimizer(object):
         ## --- Selecting the anchor points and removing duplicates
         if self.type_anchor_points_logic == max_objective_anchor_points_logic:
             # print("max objectives")
-            anchor_points_generator = ObjectiveAnchorPointsGenerator(self.space, random_design_type, f, num_samples=num_samples)
+            anchor_points_generator = ObjectiveAnchorPointsGenerator(self.space, random_design_type, f,
+                                                                     num_samples=num_samples)
         elif self.type_anchor_points_logic == thompson_sampling_anchor_points_logic:
             # print("thompson sampling")
             anchor_points_generator = ThompsonSamplingAnchorPointsGenerator(self.space, sobol_design_type, self.model)
-           
+
         ## -- Select the anchor points (with context)
         if re_use == True:
             anchor_points = self.old_anchor_points
         else:
-            anchor_points = anchor_points_generator.get(num_anchor=1,X_sampled_values=self.model.get_X_values() ,duplicate_manager=duplicate_manager, context_manager=self.context_manager)
+            anchor_points = anchor_points_generator.get(num_anchor=1, X_sampled_values=self.model.get_X_values(),
+                                                        duplicate_manager=duplicate_manager,
+                                                        context_manager=self.context_manager)
             self.old_anchor_points = anchor_points
 
-        # self.model_True_GP = self.model
-        #
-        # if self.type_anchor_points_logic == max_objective_anchor_points_logic:
-        #     anchor_points_generator_GP_mean = ObjectiveAnchorPointsGenerator(self.space, random_design_type,
-        #                                                                      self.GP_mean,
-        #                                                                      num_samples=num_samples)
-        # elif self.type_anchor_points_logic == thompson_sampling_anchor_points_logic:
-        #     anchor_points_generator_GP_mean = ThompsonSamplingAnchorPointsGenerator(self.space, sobol_design_type,
-        #                                                                             self.model)
-        #
-        # ## -- Select the anchor points (with context)
-        #
-        # anchor_points_GP_mean = anchor_points_generator_GP_mean.get(num_anchor=5, duplicate_manager=duplicate_manager,
-        #                                                             context_manager=self.context_manager)
-        #
-        # optimized_points = [apply_optimizer(self.inner_optimizer, a.flatten(), f=self.GP_mean, df=None, f_df=None,
-        #                                     duplicate_manager=duplicate_manager,
-        #                                     context_manager=self.context_manager,
-        #                                     space=self.space) for a in anchor_points_GP_mean]
-        # x_min, fx_min = min(optimized_points, key=lambda t: t[1])
-        #
-        # include_point = x_min  # np.atleast_2d(True_GP.get_X_values()[np.argmin(True_GP.get_Y_values())]) #
-        #
-        # if np.min(fx_min) > np.min(self.model.get_Y_values()):
-        #     print("x_min, fx_min", x_min, fx_min)
-        #     # print("self.model.get_X_values()",True_GP.get_X_values())
-        #     print("True_GP.get_Y_values()", np.min(self.model.get_Y_values()))
-        #     X_val_sampled = self.model.get_X_values()[np.argmin(self.model.get_Y_values())]
-        #     print("X_val_sampled ", X_val_sampled)
-        #     print("min evalated from sampled data", self.GP_mean(X_val_sampled))
-
-            # raise
-
-        # optimized_points = [apply_optimizer(self.inner_optimizer, a.flatten(), f=self.GP_mean, df=None, f_df=None,
-        #                                     duplicate_manager=duplicate_manager,
-        #                                     context_manager=self.context_manager,
-        #                                     space=self.space) for a in anchor_points]
-        # x_min, fx_min = min(optimized_points, key=lambda t: t[1])
-        #
-        # include_point = x_min #np.atleast_2d(True_GP.get_X_values()[np.argmin(True_GP.get_Y_values())]) #
-        #
-        #
-        # anchor_points = np.concatenate((include_point, anchor_points))
-
-        ## --- Applying local optimizers at the anchor points and update bounds of the optimizer (according to the context)
-
-        # if self.outer_anchor_points is not None:
-        #     # print("self.inner_anchor_points, anchor_points", self.inner_anchor_points, anchor_points)
-        #     anchor_points = np.concatenate((self.outer_anchor_points, anchor_points))
 
         print("optimising anchor points....")
         ###########################################REACTIVATE
-        optimized_points = [apply_optimizer(self.optimizer, a.flatten(), f=f, df=None, f_df=f_df, duplicate_manager=duplicate_manager, context_manager=self.context_manager, space = self.space) for a in anchor_points]
+        optimized_points = [
+            apply_optimizer(self.optimizer, a.flatten(), f=f, df=None, f_df=f_df, duplicate_manager=duplicate_manager,
+                            context_manager=self.context_manager, space=self.space) for a in anchor_points]
 
         x_min, fx_min = min(optimized_points, key=lambda t: t[1])
         self.outer_anchor_points = x_min
@@ -146,9 +97,9 @@ class AcquisitionOptimizer(object):
         print("anchor_points", anchor_points)
         print("optimized_points", optimized_points)
         return x_min, fx_min
-    
-    
-    def optimize_inner_func(self, f=None, df=None, f_df=None, duplicate_manager=None, num_samples=5000,  include_point=None):
+
+    def optimize_inner_func(self, f=None, df=None, f_df=None, duplicate_manager=None, num_samples=5000,
+                            include_point=None):
         """
         Optimizes the input function.
 
@@ -165,20 +116,21 @@ class AcquisitionOptimizer(object):
         self.inner_optimizer = choose_optimizer(self.inner_optimizer_name, self.context_manager.noncontext_bounds)
 
         if self.inner_optimizer_name == "NSGA":
-            optimized_points = apply_optimizer(self.inner_optimizer , f=f)
+            optimized_points = apply_optimizer(self.inner_optimizer, f=f)
             return optimized_points
 
         ## --- Selecting the anchor points and removing duplicates
 
         if self.type_anchor_points_logic == max_objective_anchor_points_logic:
-            anchor_points_generator = ObjectiveAnchorPointsGenerator(self.space, random_design_type, f, num_samples= num_samples)
+            anchor_points_generator = ObjectiveAnchorPointsGenerator(self.space, random_design_type, f,
+                                                                     num_samples=num_samples)
         elif self.type_anchor_points_logic == thompson_sampling_anchor_points_logic:
             anchor_points_generator = ThompsonSamplingAnchorPointsGenerator(self.space, sobol_design_type, self.model)
-           
+
         ## -- Select the anchor points (with context)
 
-        anchor_points = anchor_points_generator.get(num_anchor=5,duplicate_manager=duplicate_manager, context_manager=self.context_manager)
-
+        anchor_points = anchor_points_generator.get(num_anchor=5, duplicate_manager=duplicate_manager,
+                                                    context_manager=self.context_manager)
 
         # if self.inner_anchor_points is not None:
         #     # print("self.inner_anchor_points, anchor_points",self.inner_anchor_points, anchor_points)
@@ -193,12 +145,13 @@ class AcquisitionOptimizer(object):
 
         ################################REACTIVATE
         print("anchor_points", anchor_points)
-        optimized_points = [apply_optimizer(self.inner_optimizer, a.flatten(), f=f, df=None, f_df=f_df, duplicate_manager=duplicate_manager, context_manager=self.context_manager, space = self.space) for a in anchor_points]
-        x_min, fx_min = min(optimized_points, key=lambda t:t[1])
+        optimized_points = [apply_optimizer(self.inner_optimizer, a.flatten(), f=f, df=None, f_df=f_df,
+                                            duplicate_manager=duplicate_manager, context_manager=self.context_manager,
+                                            space=self.space) for a in anchor_points]
+        x_min, fx_min = min(optimized_points, key=lambda t: t[1])
         self.inner_anchor_points = x_min
 
         print("optimised points", optimized_points)
-
 
         return x_min, fx_min
 
@@ -219,7 +172,6 @@ class AcquisitionOptimizer(object):
         self.inner_optimizer = choose_optimizer("NSGA", self.context_manager.noncontext_bounds)
 
         optimized_points = apply_optimizer(self.inner_optimizer, f=f)
-
 
         return optimized_points
 
@@ -244,8 +196,9 @@ class AcquisitionOptimizer(object):
 
     def optimize_final_evaluation(self):
 
-        out = self.optimize(f=self.expected_improvement, duplicate_manager=None, re_use=False, num_samples=1000, sweet_spot=False, verbose=False)
-        EI_suggested_sample =  self.space.zip_inputs(out[0])
+        out = self.optimize(f=self.expected_improvement, duplicate_manager=None, re_use=False, num_samples=1000,
+                            sweet_spot=False, verbose=False)
+        EI_suggested_sample = self.space.zip_inputs(out[0])
 
         return EI_suggested_sample
 
@@ -271,7 +224,7 @@ class AcquisitionOptimizer(object):
         sigma = self.model.posterior_variance(X, noise=False)
 
         sigma = np.sqrt(sigma).reshape(-1, 1)
-        mu = mu.reshape(-1,1)
+        mu = mu.reshape(-1, 1)
         # bool_C = np.product(np.concatenate(self.C, axis=1) < 0, axis=1)
         # func_val = self.Y * bool_C.reshape(-1, 1)
         # mu_sample_opt = np.max(func_val) - offset
@@ -281,16 +234,16 @@ class AcquisitionOptimizer(object):
         #     Z = imp / sigma
         #     ei = imp * norm.cdf(Z) + sigma * norm.pdf(Z)
         #     ei[sigma == 0.0] = 0.0
-        pf = self.probability_feasibility_multi_gp(X,self.model_c).reshape(-1,1)
-        return -(mu *pf )
+        pf = self.probability_feasibility_multi_gp(X, self.model_c).reshape(-1, 1)
+        return -(mu * pf)
 
-    def probability_feasibility_multi_gp(self, x, model, mean=None, cov=None,  l=0):
+    def probability_feasibility_multi_gp(self, x, model, mean=None, cov=None, l=0):
         # print("model",model.output)
         x = np.atleast_2d(x)
         Fz = []
         for m in range(model.output_dim):
-            Fz.append(self.probability_feasibility( x, model.output[m], l))
-        Fz = np.product(Fz,axis=0)
+            Fz.append(self.probability_feasibility(x, model.output[m], l))
+        Fz = np.product(Fz, axis=0)
         return Fz
 
     def probability_feasibility(self, x, model, mean=None, cov=None, grad=False, l=0):
@@ -348,19 +301,19 @@ class ContextManager(object):
     :param context: dictionary of variables and their contex values
     """
 
-    def __init__ (self, space, context = None):
-        self.space              = space
-        self.all_index          = list(range(space.model_dimensionality))
-        self.all_index_obj      = list(range(len(self.space.config_space_expanded)))
-        self.context_index      = []
-        self.context_value      = []
-        self.context_index_obj  = []
-        self.nocontext_index_obj= self.all_index_obj
-        self.noncontext_bounds  = self.space.get_bounds()[:]
-        self.noncontext_index   = self.all_index[:]
+    def __init__(self, space, context=None):
+        self.space = space
+        self.all_index = list(range(space.model_dimensionality))
+        self.all_index_obj = list(range(len(self.space.config_space_expanded)))
+        self.context_index = []
+        self.context_value = []
+        self.context_index_obj = []
+        self.nocontext_index_obj = self.all_index_obj
+        self.noncontext_bounds = self.space.get_bounds()[:]
+        self.noncontext_index = self.all_index[:]
 
         if context is not None:
-            #print('context')
+            # print('context')
 
             ## -- Update new context
             for context_variable in context.keys():
@@ -371,20 +324,18 @@ class ContextManager(object):
 
             ## --- Get bounds and index for non context
             self.noncontext_index = [idx for idx in self.all_index if idx not in self.context_index]
-            self.noncontext_bounds = [self.noncontext_bounds[idx] for idx in  self.noncontext_index]
+            self.noncontext_bounds = [self.noncontext_bounds[idx] for idx in self.noncontext_index]
 
             ## update non context index in objective
             self.nocontext_index_obj = [idx for idx in self.all_index_obj if idx not in self.context_index_obj]
 
-
-
-    def _expand_vector(self,x):
+    def _expand_vector(self, x):
         '''
         Takes a value x in the subspace of not fixed dimensions and expands it with the values of the fixed ones.
         :param x: input vector to be expanded by adding the context values
         '''
         x = np.atleast_2d(x)
-        x_expanded = np.zeros((x.shape[0],self.space.model_dimensionality))
-        x_expanded[:,np.array(self.noncontext_index).astype(int)]  = x
-        x_expanded[:,np.array(self.context_index).astype(int)]  = self.context_value
+        x_expanded = np.zeros((x.shape[0], self.space.model_dimensionality))
+        x_expanded[:, np.array(self.noncontext_index).astype(int)] = x
+        x_expanded[:, np.array(self.context_index).astype(int)] = self.context_value
         return x_expanded

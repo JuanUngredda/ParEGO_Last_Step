@@ -572,11 +572,39 @@ class BO(object):
             uval = true_underlying_utility(y = Y_recommended,
                                            weights= weight[1],
                                            parameters= weight[0])
-
+            # print("uval_output",-np.array(uval).reshape(-1))
             return -np.array(uval).reshape(-1)
+        # print("pre opt")
 
-        true_best_x, true_best_val = optimiser(f=top_true_utility)
-        print("true_best vals", true_best_val)
+        sampled_uvals = top_true_utility(self.X)
+        best_sampled_x = np.atleast_2d(self.X[np.argmin(sampled_uvals), :])
+        true_best_x, true_best_val = optimiser(f=top_true_utility, include_point=best_sampled_x)
+        # print("post opt")
+        # initial_design = GPyOpt.experiment_design.initial_design('latin',self.space, 10000)# * (d + 1))
+        # uvals = top_true_utility(initial_design)
+        # Y_vals, _ = self.objective.evaluate(initial_design)
+        #
+        best_y, _ = self.objective.evaluate(true_best_x)
+        #
+        # plt.scatter(Y_vals[0], Y_vals[1], c=uvals)
+        # plt.scatter(best_y[0], best_y[1], color="red")
+        # plt.scatter(self.Y[0], self.Y[1], color="orange")
+        # plt.show()
+        #
+        # plt.scatter(Y_vals[0], Y_vals[2], c=uvals)
+        # plt.scatter(best_y[0], best_y[2], color="red")
+        # plt.scatter(self.Y[0], self.Y[2], color="orange")
+        # plt.show()
+        #
+        # plt.scatter(Y_vals[1], Y_vals[2], c=uvals)
+        # plt.scatter(best_y[1], best_y[2], color="red")
+        # plt.scatter(self.Y[1], self.Y[2], color="orange")
+        # plt.show()
+
+        sampled_uvals = top_true_utility(self.X)
+        # print("sampled_uvals", sampled_uvals)
+        # print("best_y", best_y, "best_val", -true_best_val)
+        # print("OC", -true_best_val-np.max(-sampled_uvals))
         # raise
         return true_best_x, -true_best_val
 

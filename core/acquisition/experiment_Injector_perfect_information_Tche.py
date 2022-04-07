@@ -1,6 +1,6 @@
 import numpy as np
 import GPyOpt
-from GPyOpt.objective_examples.experiments2d import HOLE, NO_HOLE
+from GPyOpt.objective_examples.experiments2d import HOLE, NO_HOLE, RocketInjector
 from multi_objective import MultiObjective
 from multi_outputGP import multi_outputGP
 from ParEGO_acquisition import ParEGO
@@ -11,7 +11,7 @@ from EI_UU_acquisition import ExpectedImprovementUtilityUncertainty
 from perfect_information_EI_UU_acquisition import ExpectedImprovementUtilityUncertaintywithPointUtility
 from utility_core import *
 import torch
-from botorch.test_functions.multi_objective import VehicleSafety
+# from botorch.test_functions.multi_objective import VehicleSafety
 #ALWAYS check cost in
 # --- Function to optimize
 
@@ -20,14 +20,14 @@ from botorch.test_functions.multi_objective import VehicleSafety
 # mpl.use('Qt5Agg')  # or can use 'TkAgg', whatever you have/prefer
 
 # problem = get_problem("dtlz2", n_var=d, n_obj=m)
-d = 5
+d = 4
 m = 3
 dtype = torch.double
-fun = VehicleSafety(negate=False).to(
+fun = RocketInjector(negate=False).to(
     dtype=dtype
 )
 
-space = GPyOpt.Design_space(space=[{'name': 'var', 'type': 'continuous', 'domain': (1, 3), 'dimensionality': d}])
+space = GPyOpt.Design_space(space=[{'name': 'var', 'type': 'continuous', 'domain': (0, 1), 'dimensionality': d}])
 
 def f1(X, true_val=None):
     X = torch.Tensor(X)
@@ -55,7 +55,7 @@ def f3(X, true_val=None):
 # plt.show()
 # raise
 
-def VehicleSafety_function_Tche_caller_test(rep):
+def RocketInjector_function_Tche_caller_test(rep):
 
     rep= rep
     noise = 1e-4
@@ -70,7 +70,7 @@ def VehicleSafety_function_Tche_caller_test(rep):
         for first_query_iteration_element in first_query_iteration[num_queries_idx]:
 
             folder = "RESULTS"
-            subfolder = "VehicleSafety_PI_EI_UU_SLS_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
+            subfolder = "RocketInjector_PI_EI_UU_SLS_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
             cwd = os.getcwd()
             path = cwd + "/" + folder + "/" + subfolder
 
@@ -88,7 +88,7 @@ def VehicleSafety_function_Tche_caller_test(rep):
             # define space of variables
 
             space = GPyOpt.Design_space(
-                space=[{'name': 'var', 'type': 'continuous', 'domain': (1, 3), 'dimensionality': d}])
+                space=[{'name': 'var', 'type': 'continuous', 'domain': (0, 1), 'dimensionality': d}])
 
             n_f = m
             input_d = d
@@ -189,6 +189,6 @@ def VehicleSafety_function_Tche_caller_test(rep):
         print("X",X,"Y",Y)
 
 # for rep in range(10):
-VehicleSafety_function_Tche_caller_test(rep=1)
+# RocketInjector_function_Tche_caller_test(rep=1)
 
 
