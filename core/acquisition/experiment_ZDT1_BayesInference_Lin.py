@@ -7,27 +7,31 @@ from ParEGO_acquisition import ParEGO
 from bayesian_optimisation import BO
 import os
 from DecisionMakerLastStepsInteraction import AcquisitionFunctionandDecisionMakerInteraction
-from EI_UU_acquisition_MA import ExpectedImprovementUtilityUncertainty
+from EI_UU_acquisition import ExpectedImprovementUtilityUncertainty
 from utility_core import *
+import torch
+from botorch.test_functions.multi_objective import VehicleSafety, ZDT1
 #ALWAYS check cost in
 # --- Function to optimize
 
-from pymoo.factory import get_problem
+# from pymoo.factory import get_problem
 d = 3
-m = 3
-# import matplotlib as mpl
-# mpl.use('Qt5Agg')  # or can use 'TkAgg', whatever you have/prefer
-
-problem = get_problem("dtlz2", n_var=d, n_obj=m)
+m = 2
+dtype = torch.double
+fun = ZDT1(dim=d,negate=False).to(
+    dtype=dtype
+)
 
 space = GPyOpt.Design_space(space=[{'name': 'var', 'type': 'continuous', 'domain': (0, 1), 'dimensionality': d}])
 
 def f1(X, true_val=None):
-    return problem.evaluate(X)[:,0]
+    X = torch.Tensor(X)
+    fval = fun(X)[:, 0].numpy()
+    return -fval
 def f2(X, true_val=None):
-    return problem.evaluate(X)[:,1]
-def f3(X, true_val=None):
-    return problem.evaluate(X)[:,2]
+    X = torch.Tensor(X)
+    fval = fun(X)[:, 1].numpy()
+    return -fval
 # # Attributes
 # initial_design = GPyOpt.experiment_design.initial_design('latin',
 #                                                      space, 10000)# * (d + 1))
@@ -39,37 +43,37 @@ def f3(X, true_val=None):
 # plt.show()
 # raise
 
-def DTLZ_function_Tche_caller_test(rep):
+def ZDT1_function_Lin_caller_test(rep):
 
     rep= rep
     noise = 1e-6
     np.random.seed(rep)
 
 
-    max_number_DMqueries = [0]
-    first_query_iteration = [[0]]
+    max_number_DMqueries = [0, 1]
+    first_query_iteration = [[0], [10,20,30,40,50,60,70,80,90]]
 
     for num_queries_idx in range(len(max_number_DMqueries)):
 
         for first_query_iteration_element in first_query_iteration[num_queries_idx]:
 
             folder = "RESULTS"
-            subfolder = "DTLZ2_Bayes_Assum_MA_U_Lin_SLS_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
+            subfolder = "ZDT1_Bayes_Assum_Tche_U_Lin_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
             cwd = os.getcwd()
-            path = cwd + "/" + folder + "/"+subfolder
+            path = cwd + "/" + folder + "/" + subfolder
 
             # include function
             # func= HOLE(sd=np.sqrt(noise))
 
             # --- Attributes
-            #repeat same objective function to solve a 1 objective problem
-            f = MultiObjective([f1, f2, f3])
+            # repeat same objective function to solve a 1 objective problem
+            f = MultiObjective([f1, f2])
 
             # --- Attributes
-            #repeat same objective function to solve a 1 objective problem
+            # repeat same objective function to solve a 1 objective problem
 
             # --- Space
-            #define space of variables
+            # define space of variables
             # space =  GPyOpt.Design_space(space =[{'name': 'var_1', 'type': 'continuous', 'domain': (-1.0, 1.0)},
             #                                      {'name': 'var_2', 'type': 'continuous', 'domain': (-1.0, 1.0)}])
 
@@ -104,11 +108,8 @@ def DTLZ_function_Tche_caller_test(rep):
             Tche_u = Tchevichev_utility_func(n_params=n_f)
             Lin_u = Linear_utility_func(n_params=n_f)
 
-            assumed_u_funcs = [[Tche_u], [Lin_u]]
-            names = ["Tche", "Lin"]
-            BayesInferenceUtility = Inference_method(assumed_u_funcs,
-                                                     names=names,
-                                                     Dynamic_Utility_Selection=True)
+            assumed_u_funcs = [Tche_u]
+            BayesInferenceUtility = Inference_method(u_funcs=assumed_u_funcs)
 
             # #Utility of the decision maker
             # Lin_u = Linear_utility_func(n_params=n_f)
@@ -126,11 +127,11 @@ def DTLZ_function_Tche_caller_test(rep):
             #utility functions assumed for the decision maker
 
             u_funcs_true = [Lin_u]
+
             InteractionwithDecisionMakerClass = ParetoFrontGeneration(model=model_f,
                                                                       space=space,
                                                                       seed=rep,
-                                                                      utility=u_funcs_true,
-                                                                      region_selection=False)
+                                                                      utility=u_funcs_true)
 
 
             evaluator = GPyOpt.core.evaluators.Sequential(EI_UU)
@@ -161,7 +162,6 @@ def DTLZ_function_Tche_caller_test(rep):
             X, Y, Opportunity_cost = bo.run_optimization(max_iter =100,
                                                             rep=rep,
                                                             path=path,
-                                                            model_average=True,
                                                             verbosity=False,
                                                              max_number_DMqueries=max_number_DMqueries[num_queries_idx],
                                                              first_query_iteration=first_query_iteration_element
@@ -172,9 +172,9 @@ def DTLZ_function_Tche_caller_test(rep):
         print("X",X,"Y",Y)
 
 # for rep in range(10):
-# DTLZ_function_Tche_caller_test(3)
+# HOLE_function_Lin_caller_test(3)
 # for rep in range(10):
-# NO_HOLE_function_caller_test(3)
+# ZDT1_function_Lin_caller_test(rep=1)
 # print("ready")
 
 

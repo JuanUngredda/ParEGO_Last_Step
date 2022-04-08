@@ -9,25 +9,29 @@ import os
 from DecisionMakerLastStepsInteraction import AcquisitionFunctionandDecisionMakerInteraction
 from EI_UU_acquisition_MA import ExpectedImprovementUtilityUncertainty
 from utility_core import *
+import torch
+from botorch.test_functions.multi_objective import VehicleSafety, ZDT1
 #ALWAYS check cost in
 # --- Function to optimize
 
-from pymoo.factory import get_problem
+# from pymoo.factory import get_problem
 d = 3
-m = 3
-# import matplotlib as mpl
-# mpl.use('Qt5Agg')  # or can use 'TkAgg', whatever you have/prefer
-
-problem = get_problem("dtlz2", n_var=d, n_obj=m)
+m = 2
+dtype = torch.double
+fun = ZDT1(dim=d,negate=False).to(
+    dtype=dtype
+)
 
 space = GPyOpt.Design_space(space=[{'name': 'var', 'type': 'continuous', 'domain': (0, 1), 'dimensionality': d}])
 
 def f1(X, true_val=None):
-    return problem.evaluate(X)[:,0]
+    X = torch.Tensor(X)
+    fval = fun(X)[:, 0].numpy()
+    return -fval
 def f2(X, true_val=None):
-    return problem.evaluate(X)[:,1]
-def f3(X, true_val=None):
-    return problem.evaluate(X)[:,2]
+    X = torch.Tensor(X)
+    fval = fun(X)[:, 1].numpy()
+    return -fval
 # # Attributes
 # initial_design = GPyOpt.experiment_design.initial_design('latin',
 #                                                      space, 10000)# * (d + 1))
@@ -46,15 +50,15 @@ def DTLZ_function_Tche_caller_test(rep):
     np.random.seed(rep)
 
 
-    max_number_DMqueries = [0]
-    first_query_iteration = [[0]]
+    max_number_DMqueries = [0, 1]
+    first_query_iteration = [[0], [10,20,30,40,50,60,70,80,90]]
 
     for num_queries_idx in range(len(max_number_DMqueries)):
 
         for first_query_iteration_element in first_query_iteration[num_queries_idx]:
 
             folder = "RESULTS"
-            subfolder = "DTLZ2_Bayes_Assum_MA_U_Lin_SLS_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
+            subfolder = "ZDT1_Bayes_Assum_MA_U_Lin_SLS_n_queries_" + str(max_number_DMqueries[num_queries_idx])+"_first_iteration_"+str(first_query_iteration_element)
             cwd = os.getcwd()
             path = cwd + "/" + folder + "/"+subfolder
 
@@ -63,7 +67,7 @@ def DTLZ_function_Tche_caller_test(rep):
 
             # --- Attributes
             #repeat same objective function to solve a 1 objective problem
-            f = MultiObjective([f1, f2, f3])
+            f = MultiObjective([f1, f2])
 
             # --- Attributes
             #repeat same objective function to solve a 1 objective problem
@@ -172,7 +176,7 @@ def DTLZ_function_Tche_caller_test(rep):
         print("X",X,"Y",Y)
 
 # for rep in range(10):
-# DTLZ_function_Tche_caller_test(3)
+# DTLZ_function_Tche_caller_test(rep)
 # for rep in range(10):
 # NO_HOLE_function_caller_test(3)
 # print("ready")
