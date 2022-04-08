@@ -48,7 +48,7 @@ class AcquisitionOptimizer(object):
         self.context_manager = ContextManager(space)
 
     def optimize(self, f=None, df=None, f_df=None, duplicate_manager=None, re_use=False,
-                 sweet_spot=False, num_samples=5000, verbose=True):
+                 sweet_spot=False, num_samples=1000, verbose=True):
         """
         Optimizes the input function.
 
@@ -98,7 +98,7 @@ class AcquisitionOptimizer(object):
         print("optimized_points", optimized_points)
         return x_min, fx_min
 
-    def optimize_inner_func(self, f=None, df=None, f_df=None, duplicate_manager=None, num_samples=5000,
+    def optimize_inner_func(self, f=None, df=None, f_df=None, duplicate_manager=None, num_samples=1000,
                             include_point=None):
         """
         Optimizes the input function.
