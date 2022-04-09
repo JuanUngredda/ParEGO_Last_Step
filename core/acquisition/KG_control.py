@@ -62,14 +62,16 @@ def run(args):
     hostname = sp.check_output(['hostname'], shell=True).decode()[:-1]
 
     # IMPORT AND RUN MODULES
-    from experiment_Injector_BayesInference_Tche import RocketInjector_function_Tche_caller_test as f1
-    from experiment_Injector_perfect_information_Tche import RocketInjector_function_Tche_caller_test as f2
-    number_of_csc_machines = 9
+    # from experiment_Injector_BayesInference_Tche import RocketInjector_function_Tche_caller_test as f1
+    # from experiment_Injector_perfect_information_Tche import RocketInjector_function_Tche_caller_test as f2
+    from experiment_Injector_BayesInference_20_evaluations_Tche import Injector_function_Lin_caller_test as f1
+    from experiment_Injector_BayesInference_200_evaluations_Tche import Injector_function_Lin_caller_test as f2
+    number_of_csc_machines = 8
     # from experiment_ZDT1_BayesInference_Tche_Model_Average import DTLZ_function_Tche_caller_test as f1
     # from experiment_ZDT1_BayesInference_Lin import ZDT1_function_Lin_caller_test as f2
     # from experiment_ZDT1_BayesInference_LinLin import HOLE_function_Lin_caller_test as f3
     functions = [f1, f2]
-    seed = 12
+    seed = 0
     while True:
         for func in functions:
             if args.k + seed > 20:
