@@ -64,17 +64,21 @@ def run(args):
     # IMPORT AND RUN MODULES
     # from experiment_Injector_BayesInference_Tche import RocketInjector_function_Tche_caller_test as f1
     # from experiment_Injector_perfect_information_Tche import RocketInjector_function_Tche_caller_test as f2
-    from experiment_Injector_BayesInference_20_evaluations_Tche import Injector_function_Lin_caller_test as f1
-    from experiment_Injector_BayesInference_200_evaluations_Tche import Injector_function_Lin_caller_test as f2
-    number_of_csc_machines = 8
+    # from experiment_Injector_BayesInference_20_evaluations_Tche import Injector_function_Lin_caller_test as f1
+    # from experiment_Injector_BayesInference_200_evaluations_Tche import Injector_function_Lin_caller_test as f2
+    from experiment_Injector_BayesInference_decision_maker_picks_region import ZDT1_function_caller_test as f1
+    from experiment_Injector_BayesInference_Lin import ZDT1_function_Lin_caller_test as f2
+    from experiment_Injector_BayesInference_LinLin import HOLE_function_Lin_caller_test as f3
+    from experiment_Injector_BayesInference_Tche_Model_Average import DTLZ_function_Tche_caller_test as f4
+    number_of_csc_machines = 9
     # from experiment_ZDT1_BayesInference_Tche_Model_Average import DTLZ_function_Tche_caller_test as f1
     # from experiment_ZDT1_BayesInference_Lin import ZDT1_function_Lin_caller_test as f2
     # from experiment_ZDT1_BayesInference_LinLin import HOLE_function_Lin_caller_test as f3
-    functions = [f1, f2]
+    functions = [f1, f2, f3 , f4]
     seed = 0
     while True:
         for func in functions:
-            if args.k + seed > 20:
+            if args.k + seed > 19:
                 raise
             func(args.k + seed)
         seed += number_of_csc_machines

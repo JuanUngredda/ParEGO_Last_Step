@@ -129,7 +129,7 @@ ALL_CSC_NAMES = [
 # U = [0,2,3,4,5,6,7,8]
 # python fork0_to_csc.py /home/rawsys/matjiu/MO-Constrained-benchmark/core/acquisition/KG_control.py 7 --first_fork kumeta --basedir /home/rawsys/matjiu/RESULTS_mo_botorch/HVI --conda MO-Constrained-benchmark
 
-U = [1,2, 6,7,8,9,10,12] #range(len(ALL_CSC_NAMES)) #range(len(ALL_CSC_NAMES))
+U = [1,2, 6,7,8,9,10,11, 12] #range(len(ALL_CSC_NAMES)) #range(len(ALL_CSC_NAMES))
 
 CSC_NAMES = [ALL_CSC_NAMES[i] for i in U]
 ################################ UTILITY FUNCTIONS ##########################################
